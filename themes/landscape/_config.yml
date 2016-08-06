@@ -28,9 +28,9 @@ archive_type: 'monthly'
 show_count: false
 
 # Miscellaneous
-google_analytics:
+google_analytics: UA-37223379-1
 favicon: /favicon.png
-twitter:
-google_plus:
+twitter: zjerryj
+google_plus: zhangji87@gmail.com
 fb_admins:
 fb_app_id:
