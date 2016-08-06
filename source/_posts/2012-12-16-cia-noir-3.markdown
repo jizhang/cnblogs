@@ -1,0 +1,284 @@
+---
+layout: post
+title: "Clojure实战(3)：使用Noir框架开发博客(下)"
+date: 2012-12-16 20:20
+comments: true
+categories: Tutorial
+tags: [clojure, noir]
+---
+
+Session和Cookie
+---------------
+
+做网络编程的人肯定对这两个概念不陌生，因此这里就不介绍它们的定义和作用了。我们要实现的需求也很简单：用户通过一个表单登录，在当前窗口中保持登录状态，并可以选择“记住我”来免去关闭并新开窗口之后的重登录。显然，前者使用Session，后者使用Cookie。下面我们就来看Noir对这两者的支持。
+
+### Session
+
+```clojure
+(require 'noir.session)
+(noir.session/put! :username "john")
+(noir.session/get :username "nobody")
+(noir.session/clear!)
+```
+
+很简单的API。注意`put!`函数中的`!`，和之前遇到的`?`一样，这种特殊字符是合法的函数名，但`!`习惯用来表示该方法会改变某个对象的状态，这里`put!`就表示会改变Session的状态。
+
+Noir还提供了一种“闪信（Flash）”机制，主要用于在页面跳转之间暂存消息。如用户登录后会跳转到首页，如果想在首页显示“登录成功”的信息，就需要用到闪信了。闪信的API也放置在`noir.session`命名空间下：
+
+```clojure
+(noir.session/flash-put! "登录成功")
+(noir.session/flash-get)
+```
+
+闪信的生命周期是一次请求，即在设置了闪信后的下一个请求中，可以多次`flash-get`，但再下一次请求就获取不到值了。
+
+<!-- more -->
+
+### Cookie
+
+Cookie的API示例如下：
+
+```clojure
+(require 'noir.cookies)
+(noir.cookies/put! :user_id (str 1))
+(noir.cookies/get :user_id)
+(noir.cookies/put! :tracker {:value (str 29649) :path "/" :max-age 3600})
+```
+
+需要注意的是，`put!`函数只支持字符串类型；对于Cookie超时时间的设置，一种是上面所写的多少秒过期，另一种是传入一个DateTime对象。对于时间日期的处理，Java自带的类库可能不太好用，这里推荐[Joda Time](http://joda-time.sourceforge.net/)，它有更丰富的功能和更友善的API。
+
+登录页面
+--------
+
+这里我们跳过注册页面，因为它实现的功能和新建一篇文章很相近，所以读者可以自己完成。我们假定用户信息表的格式如下：
+
+```sql
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(32) NOT NULL,
+  PRIMARY KEY (`id`)
+)
+```
+
+其中password字段保存的是密码的MD5值（32位16进制字符串）。Clojure中没有提供专门的类库，因此需要调用Java来实现。下文会贴出它的实现代码。
+
+我们重点来看对登录页面表单的处理。新建`src/blog/views/login.clj`文件，添加对`/login`的路由，显示一个包含用户名、密码、以及“记住我”复选框的表单。用户提交后，若验证成功，会跳转至`/whoami`页面，用来显示保存在session或者cookie中的信息。以下是关键代码：
+
+```clojure
+(defpage [:post "/login"] {:as forms}
+  (let [userid (model-user/get-id (:username forms) (:password forms))]
+    (if userid
+      (do (session/put! :userid userid)
+          (session/put! :username (:username forms))
+          (when (= (:remember-me forms) "1") ; “记住我”复选框
+            (cookies/put! :userid {:value (str userid) :max-age 86400}) ; 保存登录状态，时限1天。
+            (cookies/put! :username {:value (:username forms) :max-age 86400}))
+          (response/redirect "/whoami")) ; noir.response/redirect 302跳转
+      (render "/login" forms))))
+
+(defpage "/whoami" [] ; 先检测Session，再检测Cookie。
+  (if-let [userid (session/get :userid)]
+    (session/get :username)
+    (if-let [userid (cookies/get :userid)]
+      (do
+        (session/put! :userid userid)
+        (let [username (cookies/get :username)]
+          (session/put! :username username)
+          username))
+      "unknown")))
+```
+
+其中`if-let`和以下代码是等价的，类似的有`when-let`。
+
+```clojure
+(let [userid (session/get :userid)]
+  (if userid
+    (do ...)
+    "unkown"))
+```
+
+对用户表的操作我们放到`src/blog/models/user.clj`文件中：
+
+```clojure
+(ns blog.models.user
+  (:require [clojure.java.jdbc :as sql]
+            [blog.util :as util])
+  (:use [blog.database :only [db-spec]]))
+
+(defn get-id [username password]
+  (let [password-md5 (util/md5 password)]
+    (sql/with-connection db-spec
+      (sql/with-query-results rows
+        ["SELECT `id` FROM `user` WHERE `username` = ? AND `password` = ?"
+         username password-md5] ; 不要采用直接拼接字符串的方式，有SQL注入的危险。
+        (:id (first rows))))))
+```
+
+最后，我们将MD5加密这类的函数放到`src/blog/util.clj`文件中：
+
+```clojure
+(ns blog.util
+  (:import java.security.MessageDigest
+           java.math.BigInteger))
+
+(defn md5 [s]
+  (let [algorithm (MessageDigest/getInstance "MD5")
+        size (* 2 (.getDigestLength algorithm))
+        raw (.digest algorithm (.getBytes s))
+        sig (.toString (BigInteger. 1 raw) 16)
+        padding (apply str (repeat (- size (count sig)) "0"))]
+    (str padding sig)))
+```
+
+`padding`的作用是当计算得到的MD5字符串不足32位时做补零的操作。如何得到一个包含N个"0"的字符串？这就是`(apply...)`那串代码做的工作。简单来说，`(repeat n x)`函数会返回一个包含`n`个`x`元素的序列；`(apply f coll)`函数则是将`coll`序列所包含的元素作为参数传递给`f`函数，即`(apply str ["0" "0" "0"])`等价于`(str "0" "0" "0")`。`clojure.string/join`提供了将序列连接为字符串的功能，用法是`(clojure.string/join (repeat ...))`，查看它的源码`(source clojure.string/join)`可以发现，它实质上也是采用了`apply`函数。
+
+序列是Clojure的一个很重要的数据结构，有多种函数和惯用法，需要逐步积累这些知识。
+
+中间件
+------
+
+如果需要在程序的多个地方获取用户的登录状态，可以将上述`/whoami`中的方法封装成函数，但是每次都要执行一次似乎有些冗余，因此我们可以将它放到中间件（Middleware）中。
+
+中间件是[WSGI](http://en.wikipedia.org/wiki/Web_Server_Gateway_Interface)类的网站程序中很重要的特性。如果将用户的一次访问分解成`请求->处理1->处理2->应答`，那么中间件就是其中的“处理”部分，可以增加任意多个。Noir的很多功能，像路由、Session等，都是通过中间件的形式进行组织的。
+
+以下是一个空的中间件代码：
+
+```clojure
+(ns ...
+    (:require [noir.server :as server]))
+
+(defn my-middleware [handler]
+  (fn [request]
+    (handler request)))
+
+(erver/add-middleware my-middleware)
+```
+
+上述代码添加到`src/blog/server.clj`中可以直接运行，只是这个中间件没有做任何工作。中间件是一个函数，返回值是一个匿名函数（`defn`是基于`fn`的，详情可见`(doc defn)`）。`handler`参数则是前一个中间件返回的匿名函数，`request`是用户发送过来的请求（map形式）。这些中间件组合起来就成为了一条处理链。`add-middleware`则是Noir定义的函数，将用户自定义的中间件添加到处理链中。
+
+下面我们就写这样一个中间件，每次请求时都去检测Session和Cookie中是否包含用户的登录信息，并将该信息放到`request`的map中：
+
+```clojure
+(defn authenticate [handler]
+  (fn [request]
+    (let [user (if-let [userid (session/get :userid)]
+                [userid (session/get :username)]
+                (when-let [userid (cookies/get :userid)]
+                  (let [username (cookies/get :username)]
+                    (do
+                      (session/put! :userid userid)
+                      (session/put! :username username)
+                      [userid username]))))
+          req (if user
+                (assoc request :user (zipmap [:userid :username] user))
+                request)]
+      (handler req))))
+```
+
+这段代码中对于session和cookies的调用和上面没有差异，比较陌生的可能是`assoc`和`zipmap`方法，他们都是用来操作map数据类型的：前者会向一个map对象添加键值，并返回一个新的map；后者则会接收两个序列作为参数，两两组合成一个map并返回。
+
+这样我们就能将`/whoami`的代码修改为：
+
+```clojure
+(ns ...
+    (:require [noir.request :as request]))
+
+(defpage "/whoami" []
+         (if-let [user (:user (request/ring-request))]
+           (:username user)
+           "unkown"))
+```
+
+其中，`ring-request`用来获得用户的`request`map对象。
+
+程序发布
+--------
+
+这里介绍三种Web应用程序的发布方式。
+
+### 直接使用Leiningen
+
+如果服务器上安装有`lein`环境，则可以直接调用它来启动程序。只有一点需要注意，因为在默认情况下，`lein run`启动的程序会被包装在Leiningen的JVM中，这样会占用一些额外的内存，同时引起一些`stdin`方面的问题。解决方法是使用`lein trampoline run`命令来启动程序，这样Leiningen为程序启动一个独立的JVM，并退出自己的JVM。
+
+### 编译为独立Jar包
+
+`lein uberjar`命令可以将项目编译后的代码及其所有的依赖包打入一个Jar文件中，和Maven的assembly插件类似。需要注意的是，Clojure文件在默认情况下是不会生成类文件的，而是在运行时进行解析。这样一来，当使用`java -jar`命令执行时会提示找不到类定义的错误。解决方法是为包含入口函数的模块生成类文件，需要在`src/blog/server.clj`的`ns`声明中添加`gen-class`标识：
+
+```clojure
+(ns blog.server
+    ...
+    (:gen-class))
+```
+
+然后就能打包运行了：
+
+```bash
+$ lein uberjar
+$ java -jar blog-0.1.0-SNAPSHOT-standalone.jar
+2012-12-23 00:07:47.417:INFO::jetty-6.1.x
+2012-12-23 00:07:47.430:INFO::Started SocketConnector@0.0.0.0:8080
+```
+
+可以在程序前部署一个Nginx代理做转发，配置方法就不在这里赘述了。
+
+### 使用Tomcat
+
+以上两种方法使用的都是Jetty这个Web容器，虽然比较方便，但在生产环境中我们更倾向于使用Tomcat。
+
+对于Tomcat的安装这里不做讲解，读者可以到[Tomcat官网](http://tomcat.apache.org/)查阅。
+
+Clojure代码也需要做一些修改，我们需要提供一个接口供Tomcat调用，也就是`Handler`。在`src/blog/server.clj`中添加以下代码：
+
+```clojure
+(def handler (server/gen-handler
+               {:mode :prod,
+                :ns 'blog}))
+```
+
+`gen-handler`是Noir的函数，用来生成一个`Handler`。`'blog`前的单引号大家应该还有印象，它表示命名空间。
+
+`server.clj`还有一项内容需要修改：删除`load-views`，改为显式的`require`，这样才能保证在编译期间就加载路由配置，Tomcat才会认可。代码如下：
+
+```clojure
+(ns ...
+    (:require [blog.views welcome article]))
+
+; (server/load-views "src/blog/views")
+```
+
+和`uberjar`类似，我们需要使用`uberwar`来打包成一个包含所有依赖项的war包。不过这个工具是由一个Leiningen插件提供的：`lein-ring`，安装过程和`lein-noir`类似，首先在`project.clj`添加dev依赖，然后执行`lein deps`安装。要使上述`handler`生效，`project.clj`中还需要增加一项名为`:ring`的配置：
+
+```clojure
+(defproject blog ...
+            ...
+            :dev-dependencies [...
+                               [lein-ring "0.7.5"]]
+            :ring {:handler blog.server/handler})
+```
+
+执行`lein ring uberwar`命令，将生成的war包放置到Tomcat的webapps目录中，命名为ROOT.war，也可以设置[Virtual Hosting](http://tomcat.apache.org/tomcat-7.0-doc/virtual-hosting-howto.html)。片刻后，Tomcat会应用这个新的程序，我们就能在浏览器中访问了。
+
+发布至云端Heroku
+----------------
+
+最后，我们来尝试将这个博客程序部署到线上环境中。如今云计算已经非常流行，有许多优秀的[PaaS](http://en.wikipedia.org/wiki/Platform_as_a_service)平台，[Heroku](http://www.heroku.com)就是其中之一。在Heroku上部署一个小型的应用是完全免费的，这里我们简述一下步骤，更详细的操作方法可以参考它的[帮助文档](https://devcenter.heroku.com/articles/clojure)。
+
+* 登录Heroku网站并注册账号；
+* 安装[Toolbelt](https://toolbelt.heroku.com/)，从而能在命令行中使用`heroku`命令；
+* 执行`heroku login`命令，输入账号密码，完成验证；
+* 新建`src/Procfile`文件，输入`web: lein trampoline run blog.server`；
+* 执行`foreman start`命令，可以在本地测试程序；
+* 执行`heroku create`，Heroku会为你分配一个空间；
+* 执行`git push heroku master`，将本地代码推送至云端，可以看到编译信息，并得到一个URL，通过它就能访问我们的应用程序了。
+
+以上步骤省略了数据库的配置，读者可以自行到[Heroku ClearDB](https://addons.heroku.com/cleardb)页面查看配置方法。
+
+小结
+----
+
+至此我们完成了对Noir网站开发框架的简介，也完成了对Clojure这门语言的入门介绍。不过《Clojure实战》系列还远没有结束，下一章开始我们会进入Clojure语言更擅长的领域——计算。我们会陆续介绍如何使用Clojure编写[Hadoop](http://hadoop.apache.org) MapReduce脚本、编写[Storm](http://www.storm-project.net) Topology、以及如何使用[Incanter](http://incanter.org/)进行可视化数据分析。不过在此之前，我强烈建议读者能够回头看看第一章中提到的几个Clojure教程，这样能对Clojure语言的整体架构有一个印象，接下来的学习才会更为顺畅。
+
+### PS
+
+在撰写这份Noir框架教程时，Noir作者宣布停止对Noir的开发和维护，鼓励开发者转而使用Ring+Compojure+lib-noir的方式进行开发。这对我们并无太大影响，毕竟我们只是利用Noir来学习Clojure，而且前文提过Noir本身就是基于Ring和Compojure这两个类库的，迁移起来非常方便，我会为此再写一篇博客的。

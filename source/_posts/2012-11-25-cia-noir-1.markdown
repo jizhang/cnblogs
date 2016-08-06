@@ -1,0 +1,341 @@
+---
+layout: post
+title: "Clojure实战(1)：使用Noir框架开发博客(上)"
+date: 2012-11-25 16:58
+comments: true
+categories: Tutorial
+tags: [clojure, noir]
+---
+
+前言
+----
+
+为什么要学习一门新的语言？我的想法很简单，平时OO、PO代码写多了，却从未接触过函数式编程，不免有些遗憾。考察下来，Clojure可以用来尝尝鲜，所以就决定学一学。为了给自己的学习留下些记录，就有了这样一份教程。
+
+Clojure已经有一些不错的教程，如[Mark Volkmann][1]的[Clojure - Functional Programming for the JVM][2]，Storm的主要贡献者[徐明明][3]也对这个教程做了[全文翻译][4]。还有一些不错的书籍，像[O'Reilly][5]的[Clojure Programming][6]，都值得一读。我是从Mark的教程开始学起的，对其中没有提到的部分则是参考了Clojure Programming这本书。Clojure的[官方网站][7]上有详尽的[API参考][10]，可以作为工具书查阅。
+
+但是，上面提到的教程都是针对Clojure语言本身的，从 *Hello, world!* 开始，讲解Clojure的各种语法，关键字，结构等等。虽然Clojure的语法已经足够吸引你的眼球，在[REPL][8]中敲击Clojure代码已经是一种莫大的乐趣了，但似乎还有些不够，我们想看到一个用Clojure编写的应用程序！
+
+因为平时都是做Web开发，所以先从一个Web框架入手会是不错的选择，因此这份教程会从使用[Noir][9]框架搭建一个博客开始，带你领略Clojure的魅力。
+
+<!-- more -->
+
+一句话概述Clojure
+-----------------
+
+**Clojure是一种运行在JVM平台上的函数式编程语言。**
+
+* [JVM平台][11]：历史悠久，应用广泛，成熟稳定。Clojure可以和Java程序交互，调用各种类库，与现有系统整合。
+* [函数式编程][12]：[Lisp][13]的一种方言，表达力强，是解决高并发问题的利器。
+
+安装Clojure
+-----------
+
+Clojure是以一个Jar包发行的，可以到[官网下载][16]后使用`java -jar`命令运行。而在实际开发中，我们会选择使用[Leiningen][14]或[Maven][15]来管理Clojure项目，本教程将以Leiningen（命令行是`lein`）作为项目管理工具进行讲解。
+
+### 安装Leiningen
+
+`lein`目前有1.x和2.x两个版本，后者还在alpha阶段。使用以下命令安装`lein` 1.x版本：
+
+```bash
+$ cd ~/bin # 假设$HOME/bin目录在系统的$PATH中
+$ wget https://raw.github.com/technomancy/leiningen/stable/bin/lein
+$ chmod 755 lein
+$ lein self-install
+$ lein repl
+REPL started; server listening on localhost port 1096
+user=>
+```
+
+这样就已经安装好了`lein`和Clojure环境，并启动了一个REPL，可以直接运行Clojure代码：
+
+```clojure
+user=> (+ 1 2)
+3
+user=>
+```
+
+这里出现了Clojure的两个特点：圆括号和前缀表达式。Clojure的基本语法是`(fn1 arg1 (fn2 arg2 arg3))`。函数是Clojure中的“一等公民”，它即是可执行的代码，又是一种数据（类似闭包的概念）。以后我们会慢慢熟悉。
+
+### 新建项目
+
+```bash
+$ lein new proj
+$ find proj
+proj
+proj/project.clj
+proj/src/proj/core.clj
+$ cat proj/project.clj
+(defproject proj "1.0.0-SNAPSHOT"
+  :description "FIXME: write description"
+  :dependencies [[org.clojure/clojure "1.3.0"]])
+```
+
+`lein new`命令用来创建一个Clojure项目骨架，最重要的文件是`project.clj`，它声明了项目的基本属性以及依赖包。
+
+`lein plugin`命令可以用来管理lein的插件，我们可以通过安装lein-noir插件来生成基于Noir的项目骨架：
+
+```bash
+$ lein plugin install lein-noir 1.2.1
+$ lein noir new blog
+$ find blog
+blog
+blog/project.clj
+blog/resources/public/css/reset.css
+blog/resources/public/img
+blog/resources/public/js
+blog/src/blog/models
+blog/src/blog/server.clj
+blog/src/blog/views/common.clj
+blog/src/blog/views/welcome.clj
+```
+
+我们可以直接运行这个项目：
+
+```bash
+$ cd blog
+$ lein run
+Starting server...
+2012-11-29 22:34:39.174:INFO::jetty-6.1.25
+2012-11-29 22:34:39.237:INFO::Started SocketConnector@0.0.0.0:8080
+```
+
+浏览http://localhost:8080，就能看到项目的页面了。
+
+Noir项目的基本结构
+------------------
+
+### 项目基本信息：project.clj
+
+Clojure文件都是以`.clj`为扩展名的。项目根目录下的project.clj文件包含了一些基本信息，我们逐一分析：
+
+```clojure
+(defproject blog "0.1.0-SNAPSHOT"
+            :description "FIXME: write this!"
+            :dependencies [[org.clojure/clojure "1.3.0"]
+                           [noir "1.2.1"]]
+            :main blog.server)
+```
+
+[defproject][17]是Leiningen定义的一个[宏][18]，用来描述项目的基本信息。宏在Clojure中是一个很重要的语言特性，简单地说，开发者可以用宏创造出新的语法。
+
+:description、:main等是一种直接量(literal)，我们称之为关键字(keyword)，通常以`:`开头，主要用来作为哈希表(map)中的键名，这里则用来表示项目的某种信息，从名称上应该很好理解。
+
+`[1 ["b", false]]`中的`[...]`表示一个向量(vector)，它的元素可以是任意类型，元素之间以空格或逗号分隔。这行代码也展示了Clojure中其他几种直接量：数值型、字符串、布尔型。
+
+依赖项的描述也很直观，`[groupId/artifactId "version"]`。Clojure使用了和Maven相似的包命名方式，当groupId和artifactId相同时，可以进行简写，如`[noir "1.2.1"]`等价于`[noir/noir "1.2.1"]`，这也是Clojure鼓励的做法。对依赖项进行修改后，可以运行`lein deps`命令进行安装。lein会先从[Clojars][19]上查找和下载，不存在时再到[Maven中央仓库][20]中搜索。
+
+最后，:main顾名思义指向的是程序入口，它配置的是一个命名空间，其中会包含一个`-main`方法（注意方法名中的`-`）。Leiningen项目的目录结构也是按照命名空间来的，这点和Java一致。
+
+### 入口文件：src/blog/server.clj
+
+```clojure
+(ns blog.server
+  (:require [noir.server :as server]))
+
+(server/load-views "src/blog/views/")
+
+(defn -main [& m]
+  (let [mode (keyword (or (first m) :dev))
+        port (Integer. (get (System/getenv) "PORT" "8080"))]
+    (server/start port {:mode mode
+                        :ns 'blog})))
+```
+
+ns宏用于定义当前的命名空间，:require表示导入其它命名空间，:as则是将为导入的命名空间设置别名。注意这些关键字及其用法都是在ns宏中定义的，这也是为什么说宏可以用来创造新的语法。
+
+关于命名空间，你在执行`lein repl`的时候可能会注意到，当在blog项目下执行时，提示符是`blog.server=>`，而在其他目录下执行时是`user=>`，因为user是Clojure默认的命名空间，可以通过`(ns myspace)`来切换成`myspace=>`。
+
+`server/load-views`表示调用`server`命名空间下的`load-views`函数，后面的`src/blog/views/`则是函数的参数。在大多数语言中，函数名称不能包含特殊字符，如`-`，但Clojure中的变量名、函数名、关键字等都可以包含诸如\*、+、!、>这样的特殊字符。其中一些字符是有特定含义的，如关键字必须以`:`开头，以`::`开头的则表示仅在当前命名空间中有效。这些约定需要注意。
+
+defn宏用来定义一个函数，基本用法是`(defn 函数名 [参数列表] 语句1 语句2)`。如果参数数量不定，可以使用这样的语法`[arg1 arg2 & args]`，这样当函数接收四个参数时，后两个参数会作为一个向量赋值给args变量。
+
+关于let，它是继“宏”和“函数”之后出现的第三个术语，“特殊形式”(Special Form)。我们暂时不去了解它们之间的关系，先来看看let的作用。设想这样一个场景，我们在调用一个函数之前会准备一些参数传送给它，这些参数仅在函数内部可见，函数处理完后就会销毁。let则是将参数准备和函数调用这两步整合了起来。它的语法是`(let [变量1 表达式1 变量2 表达式2] 语句1 语句2)`，举例来说，尝试在REPL中执行以下命令，思考一下结果是如何得出的：
+
+```clojure
+user=> (let [x 1 y (+ 2 3)] (+ x y))
+6
+user=>
+```
+
+入口文件中的表达式看起来有些复杂，但逐步拆解后就会明白：
+
+```clojure
+user=> (def m []) ; 定义一个变量，它是一个空向量，正如不带参数调用-main函数时一样。Clojure中分号表示注释。
+user=> (first m) ; 获取向量（序列）的第一个元素，这里为空。
+nil
+user=> (or (first m) :dev) ; 从左往右执行参数，若结果不为空(nil)则停止执行，并返回该结果。
+:dev
+user=> (keyword (or (first m) :dev)) ; 获取关键字。由于传入的参数可能是一个关键字、一个变量、或一个字符串，因此使用keyword函数返回一个关键字类型。
+:dev
+```
+
+经过处理，mode变量包含了:dev这个关键字，且作用域仅在(let ...)中有效。
+
+再来看看port变量，这里涉及到了与Java类的交互：
+
+```clojure
+user=> (System/getenv) ; 这里的System不是一个命名空间，而是Java的一个类。通过这种方式我们调用了System类的静态方法getenv，并返回了一个Map类实例。
+java.util.Collections$UnmodifiableMap
+user=> (get (System/getenv) "PORT" "8080") ; 这里的get不是Map实例的get方法，而是Clojure中的一个函数，用于返回哈希表(map)中的值，不存在则返回一个默认值。
+"8080"
+user=> (.get (System/getenv) "PORT") ; 这才是调用Map实例的get方法，注意点号和函数的参数。
+nil
+user=> (Integer. (get (System/getenv) "PORT" "8080")) ; 又是一个和Java交互的语法：创建实例。它和以下语法等价：
+8080
+user=> (new Integer (get (System/getenv) "PORT" "8080"))
+8080
+```
+
+关于map再补充一点，它虽然是Clojure的一种数据类型，但底层其实是Map接口一个实现，因此以下语法是合法的。类似的情况在Clojure中还有很多。
+
+```clojure
+user=> (def m {:a 1, :b 2}) ; map的语法是{键1 值1 键2 值2}，为了加强可读性，这里使用了逗号分隔了两组键值，Clojure在编译时会将逗号转换成空格。
+user=> (< (get m :a) (.get m :b)) ; 1 < 2
+true
+```
+
+参数的赋值就结束了，后面的代码也很好理解：调用server命名空间下的start函数，参数是监听端口和一组由map表示的参数。这里blog之前的单引号需要注意，表示其后的代码不需要进行解析(evaluate)，在表示命空间名时都需要加上（ns宏除外），如：
+
+```clojure
+user=> (require 'noir.server) ; 引入一个命名空间，使用noir.server/start调用方法。
+user=> (alias 'server 'noir.server) ; 设置别名。
+user=> (refer 'noir.server) ; 将该命名空间下的变量导入当当前命名空间中，即可以直接使用(start ...)调用。
+user=> (use 'noir.server) ; 同时完成require和refer。
+```
+
+**小贴士**
+
+这一节中我们引入了不少Clojure的函数、宏、特殊形式，有时会需要查阅这些函数的用法。除了上网查找API文档，还可以在REPL中使用`doc`和`source`函数来返回某个函数或宏的文档和源码：
+
+```clojure
+user=> (doc first)
+-------------------------
+clojure.core/first
+([coll])
+  Returns the first item in the collection. Calls seq on its
+    argument. If coll is nil, returns nil.
+```
+
+### 基本页面：src/blog/views/welcome.clj
+
+入口文件中的`load-views`函数会将指定目录下的所有文件都包含进来，这些文件中定义的是URL路由以及页面内容，以welcome.clj为例：
+
+```clojure
+(ns blog.views.welcome
+  (:require [blog.views.common :as common]
+            [noir.content.getting-started])
+  (:use [noir.core :only [defpage]]
+        [hiccup.core :only [html]]))
+
+(defpage "/welcome" []
+         (common/layout
+           [:p "Welcome to blog"]))
+```
+
+我们先跳过这些代码，来看看如何定义一个新的页面。将以下代码添加到welcome.clj尾部，然后执行`lein run`。
+
+```clojure
+(defpage "/greeting" []
+         (html
+           [:h1 "Hello, world!"]))
+```
+
+访问 http://127.0.0.1:8080/greeting 就能看到一个新的页面了，页面源码是`<h1>Hello, world!</h1>`。
+
+defpage是Noir的一个宏，用来定义URL和它返回的页面内容。URL的定义有很多其他用法，如POST方式、截取参数等，我们稍后都会用到。页面内容方面，可以直接返回字符串，如`(defpage "/greeting" [] "Hello, world!")`，也可以使用Hiccup构建HTML页面。[Hiccup][21]是Noir默认的模板引擎，简单来说就是用Clojure来写HTML。一个完整的页面示例如下：
+
+```clojure
+(ns ...
+  (:use ...
+        [hiccup.page-helpers :only [html4]]))
+        
+(defpage "/greeting" []
+         (html4
+           [:head
+             [:title "Greeting"]]
+           [:body
+             [:h1 "Hello, world!"]]))
+```
+
+生成的HTML是：
+
+```html
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>Greeting</title>
+  </head>
+  <body>
+    <h1>Hello, world!</h1>
+  </body>
+</html>
+```
+
+其中，html和html4都是Hiccup定义的宏。html仅将接收到的参数转换为HTML代码，html4则是会添加相应版本的`<!DOCTYPE>`和`<html>`标签。要使用这些宏需要引入相应的命名空间。:only则表示只引入命名空间中特定的宏。
+
+关于命名空间中出现的`-`，Clojure在编译时会自动转换成`_`，从而确保程序在JVM中运行时不会出现问题。
+
+### 页面模板：src/blog/views/common.clj
+
+回到系统生成的welcome.clj文件，它并没有使用html或html4，而是调用了一个`common/layout`函数。那么让我们看看common.clj中这个函数的定义：
+
+```clojure
+(ns blog.views.common
+  (:use [noir.core :only [defpartial]]
+        [hiccup.page-helpers :only [include-css html5]]))
+
+(defpartial layout [& content]
+            (html5
+              [:head
+               [:title "blog"]
+               (include-css "/css/reset.css")]
+              [:body
+               [:div#wrapper
+                content]]))
+```
+
+defpartial是Noir的一个宏，用来定义一段可复用的HTML代码。当然我们也可以将其定义为一个函数（用`defn`替换掉`defpartial`），不会有什么区别。官方文档的解释是使用defpartial会比较容易辨认。
+
+`include-css`是一个函数，用来生成`<link>`标签。`[:div#wrapper ...]`会生成`<div id="wrapper">...</div>`。更多Hiccup的语法可以到[这个页面][22]浏览一下。
+
+### 默认首页：noir.content.getting-started
+
+我们在代码中并没有看到`(defpage "/" [] ...)`这样的定义，那为什么网站根目录会出现一个默认页面呢？答案在`noir.content.getting-started`这个命名空间中，可以[点击这里][23]查看它的源码。要取消这个默认页面，可以在welcome.clj的:require中将其删除。
+
+### 静态资源：src/resources/public
+
+Noir默认对src/resources/public目录下的文件做了路由，因此当有一个资源文件位于src/resources/public/css/reset.css时，可以通过http://127.0.0.1:8080/css/reset.css访问。
+
+值得一提的是，Noir项目本身依赖于两个开源项目：[ring][24]和[compojure][25]，前者对HTTP请求进行了封装，提供了一套类似Python WSGI的API；后者则是专门提供URL路由功能的类库。如对静态资源的路由，实质上Noir是调用了compojure提供的resources函数，函数中又调用ring提供的GET、wrap-file-info等函数响应请求。
+
+小结
+----
+本章讲述了Clojure环境的搭建，特别是项目管理工具`lein`的一般使用。通过对Noir项目骨架的分析，我们一窥Clojure的语法，接触了变量、直接量、函数、宏、命名空间的一些用法，并能结合Noir和Hiccup写出简单的页面来。下一章我们将讲解如何使用Noir编写表单页面进行交互，以及Clojure如何连接数据库，对博文进行增删改查等操作。
+
+
+[1]: http://java.ociweb.com/mark/
+[2]: http://java.ociweb.com/mark/clojure/article.html
+[3]: http://xumingming.sinaapp.com/
+[4]: http://xumingming.sinaapp.com/302/clojure-functional-programming-for-the-jvm-clojure-tutorial/
+[5]: http://oreilly.com/
+[6]: http://www.amazon.com/Clojure-Programming-Chas-Emerick/dp/1449394701
+[7]: http://clojure.org/
+[8]: http://en.wikipedia.org/wiki/Read-eval-print_loop
+[9]: http://webnoir.org/
+[10]: http://clojure.github.com/clojure/
+[11]: http://en.wikipedia.org/wiki/Jvm
+[12]: http://en.wikipedia.org/wiki/Functional_programming
+[13]: http://en.wikipedia.org/wiki/LISP
+[14]: https://github.com/technomancy/leiningen
+[15]: http://maven.apache.org/
+[16]: http://clojure.org/getting_started
+[17]: http://clojuredocs.org/leiningen/leiningen.core/defproject
+[18]: http://clojure.org/macros
+[19]: https://clojars.org
+[20]: http://search.maven.org/
+[21]: https://github.com/weavejester/hiccup
+[22]: http://www.webnoir.org/tutorials/html
+[23]: https://github.com/noir-clojure/noir/blob/master/src/noir/content/getting_started.clj
+[24]: https://github.com/ring-clojure/ring
+[25]: https://github.com/weavejester/compojure/tree/master/src
