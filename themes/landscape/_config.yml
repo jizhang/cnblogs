@@ -1,6 +1,8 @@
 # Header
 menu:
   Home: /
+  Big Data: /categories/Big-Data
+  Programming: /categories/Programming
   Archives: /archives
 rss: /atom.xml
 
@@ -11,8 +13,8 @@ fancybox: true
 # Sidebar
 sidebar: right
 widgets:
-- category
-- tag
+#- category
+#- tag
 - tagcloud
 - archive
 - recent_posts
