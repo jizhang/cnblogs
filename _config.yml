@@ -70,3 +70,5 @@ theme: landscape
 deploy:
   type: git
   repo: git@github.com:jizhang/jizhang.github.com
+
+disqus_shortname: jizhang
