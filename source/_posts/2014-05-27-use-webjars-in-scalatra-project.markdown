@@ -3,8 +3,8 @@ layout: post
 title: "Use WebJars in Scalatra Project"
 date: 2014-05-27 17:44
 comments: true
-categories: [Notes]
-published: true
+categories: [Programming]
+tags: [scala, scalatra, webjars, english]
 ---
 
 As I'm working with my first [Scalatra](http://www.scalatra.org/) project, I automatically think of using [WebJars](http://www.webjars.org/) to manage Javascript library dependencies, since it's more convenient and seems like a good practice. Though there's no [official support](http://www.webjars.org/documentation) for Scalatra framework, the installation process is not very complex. But this doesn't mean I didn't spend much time on this. I'm still a newbie to Scala, and there's only a few materials on this subject.

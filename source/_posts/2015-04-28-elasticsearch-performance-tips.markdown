@@ -1,10 +1,11 @@
+
 ---
 layout: post
 title: "ElasticSearch Performance Tips"
 date: 2015-04-28 23:08
-categories: [Notes]
+categories: [Programming]
 comments: true
-published: true
+tags: [elasticsearch, english]
 ---
 
 Recently we're using ElasticSearch as a data backend of our recommendation API, to serve both offline and online computed data to users. Thanks to ElasticSearch's rich and out-of-the-box functionality, it doesn't take much trouble to setup the cluster. However, we still encounter some misuse and unwise configurations. So here's a list of ElasticSearch performance tips that we learned from practice.
