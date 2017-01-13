@@ -7,8 +7,8 @@ title: "Ji ZHANG's Blog"
 subtitle: If I rest, I rust.
 description:
 author: Ji ZHANG
-language:
-timezone:
+language: language
+timezone: Asia/Shanghai
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
