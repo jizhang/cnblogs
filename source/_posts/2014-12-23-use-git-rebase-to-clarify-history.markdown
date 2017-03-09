@@ -9,7 +9,7 @@ published: true
 
 当多人协作开发一个分支时，历史记录通常如下方左图所示，比较凌乱。如果希望能像右图那样呈线性提交，就需要学习git rebase的用法。
 
-![](/images/git-rebase/rebase-result.png)
+![](/cnblogs/images/git-rebase/rebase-result.png)
 
 ## “Merge branch”提交的产生
 
@@ -66,7 +66,7 @@ $ git config --global branch.autosetuprebase always
 
 先看看git merge的示意图：
 
-![](/images/git-rebase/merge.png)
+![](/cnblogs/images/git-rebase/merge.png)
 
 [图片来源](https://www.atlassian.com/ja/git/tutorial/git-branches)
 
@@ -74,9 +74,9 @@ $ git config --global branch.autosetuprebase always
 
 再来看git rebase的示意图：
 
-![](/images/git-rebase/rebase-1.png)
+![](/cnblogs/images/git-rebase/rebase-1.png)
 
-![](/images/git-rebase/rebase-2.png)
+![](/cnblogs/images/git-rebase/rebase-2.png)
 
 Feature分支中的两个提交被“嫁接”到了Master分支的头部，或者说Feature分支的“基”（base）变成了 Master，rebase也因此得名。
 
@@ -94,7 +94,7 @@ $ git push origin master
 
 历史就成了这样：
 
-![](/images/git-rebase/no-ff.png)
+![](/cnblogs/images/git-rebase/no-ff.png)
 
 可以看到，Merge branch 'feature-branch'那段可以很好的展现出这些提交是属于某一特性的。
 
