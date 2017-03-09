@@ -3,16 +3,16 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: "Ji ZHANG's Blog"
+title: "张吉的博客"
 subtitle: If I rest, I rust.
 description:
-author: Ji ZHANG
-language: language
+author: 张吉
+language: zh-CN
 timezone: Asia/Shanghai
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://shzhangji.com
+url: http://cn.shzhangji.com
 root: /
 permalink: blog/:year/:month/:day/:title/
 permalink_defaults:
@@ -69,6 +69,6 @@ theme: landscape
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: git@github.com:jizhang/jizhang.github.com
+  repo: git@github.com:jizhang/cn.shzhangji.com
 
 disqus_shortname: jizhang
