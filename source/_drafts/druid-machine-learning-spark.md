@@ -1,5 +1,5 @@
 ---
-title: "Hive+Druid实现快速查询；线性回归是机器学习吗；StructuredStreaming可用于生产环境"
+title: "Hive+Druid实现快速查询；回归分析是机器学习吗；StructuredStreaming可用于生产环境"
 tags: [hive, druid, machine learning, stream processing, spark]
 categories: [Digest]
 ---
@@ -21,6 +21,6 @@ categories: [Digest]
       * topN, time series, simple aggregations grouped by defined dimensions
     * complex operations push work down to druid
 
-原文：[Ultra-Fast OLAP Analytics With Apache Hive and Druid (Part 1)](https://dzone.com/articles/ultra-fast-olap-analytics-with-apache-hive-and-dru)
+原文：https://dzone.com/articles/ultra-fast-olap-analytics-with-apache-hive-and-dru
 
 <!-- more -->
