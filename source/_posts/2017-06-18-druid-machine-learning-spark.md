@@ -40,7 +40,7 @@ Druid和Hive的结合方式是这样的：首先使用Hive对数据进行预处�
 
 ## StructuredStreaming可用于生产环境
 
-![Data stream as an unbounded table](https://spark.apache.org/docs/latest/img/structured-streaming-stream-as-a-table.png)
+![将数据流看做一张无边界的表](https://spark.apache.org/docs/latest/img/structured-streaming-stream-as-a-table.png)
 
 2016年中，Spark推出了StructredStreaming，随着时间的推移，这一创新的实时计算框架也日臻成熟。
 
