@@ -236,14 +236,14 @@ pd.concat([df_a, df_b]).drop_duplicates()
 
 # 分组排名
 
-最后，我们经常会需要在分组中按某以规则排序，并获得前几位的记录。MySQL 中需要通过变量来实现，Pandas 中则可以使用 `rank` 函数：
+最后，我们经常会需要在分组中按某种规则排序，并获得前几位的记录。MySQL 中需要通过变量来实现，Pandas 中则可以使用 `rank` 函数：
 
 ```python
 rnk = df.groupby('origin')['delay'].rank(method='first', ascending=False)
 df.assign(rnk=rnk).query('rnk <= 3').sort_values(['origin', 'rnk'])
 ```
 
-## References
+## 参考资料
 
 * https://pandas.pydata.org/pandas-docs/stable/comparison_with_sql.html
 * http://www.gregreda.com/2013/01/23/translating-sql-to-pandas-part1/
