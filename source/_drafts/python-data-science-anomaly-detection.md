@@ -1,9 +1,9 @@
-title: "2017 Top 15 数据科学 Python 类库；时间序列异常点检测"
+title: "2017 Top 15 Python 数据科学类库；时间序列异常点检测"
 categories: Digest
 tags: [data science, analytics]
 ---
 
-## 2017 Top 15 数据科学 Python 类库
+## 2017 Top 15 Python 数据科学类库
 
 ![Google Trends](https://cdn-images-1.medium.com/max/800/0*9pG2IJUPXSFZh-J0.png)
 
