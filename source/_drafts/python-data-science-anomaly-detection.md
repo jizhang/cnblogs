@@ -7,7 +7,9 @@ tags: [data science, analytics]
 
 ![Google Trends](https://cdn-images-1.medium.com/max/800/0*9pG2IJUPXSFZh-J0.png)
 
-* Core libraries
+近年来，Python 在数据科学领域得到了越来越多的关注，本文整理归类了使用率最高的数据科学类库，供大家参考。
+
+* Core Libraries 
   * NumPy: operate n-arrays and matrices, vectorization of mathematical operations, high performance;
   * SciPy: linear algebra, optimization, integration, and statistics;
   * Pandas: work with labeled for relational data, perfect for data wrangling, quick data manipulation, aggregation, and visualization;
