@@ -1,5 +1,6 @@
+---
 title: "2017 Top 15 Python 数据科学类库；时间序列异常点检测"
-categories: Digest
+categories: [Digest]
 tags: [data science, analytics]
 ---
 
@@ -9,7 +10,7 @@ tags: [data science, analytics]
 
 近年来，Python 在数据科学领域得到了越来越多的关注，本文整理归类了使用率最高的数据科学类库，供大家参考。
 
-* Core Libraries 
+* Core Libraries
   * NumPy: operate n-arrays and matrices, vectorization of mathematical operations, high performance;
   * SciPy: linear algebra, optimization, integration, and statistics;
   * Pandas: work with labeled for relational data, perfect for data wrangling, quick data manipulation, aggregation, and visualization;
