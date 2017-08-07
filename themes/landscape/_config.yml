@@ -17,6 +17,7 @@ sidebar: right
 widgets:
 #- category
 #- tag
+- qrcode
 - tagcloud
 - archive
 - recent_posts
