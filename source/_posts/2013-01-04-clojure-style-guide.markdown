@@ -141,7 +141,7 @@ published: true
       []
       (bar))
 ```
-* 使用Unix风格的换行符（*BSD、Solaris、Linux、OSX用户无需设置，Windows用户则需要格外注意了）
+* 使用Unix风格的换行符（\*BSD、Solaris、Linux、OSX用户无需设置，Windows用户则需要格外注意了）
     * 如果你使用Git，为了防止项目中意外引入Windows风格的换行符，不妨添加如下设置：
 
 ```bash
