@@ -6,7 +6,7 @@ tags: [data science, analytics]
 
 ## 2017 Top 15 Python 数据科学类库
 
-![Google Trends](https://cdn-images-1.medium.com/max/800/0*9pG2IJUPXSFZh-J0.png)
+![Google Trends](/cnblogs/images/digest/google-trends.png)
 
 近年来，Python 在数据科学领域得到了越来越多的关注，本文整理归类了使用率最高的数据科学类库，供大家参考。
 
@@ -37,6 +37,8 @@ tags: [data science, analytics]
 <!-- more -->
 
 ## 时间序列数据异常点检测算法
+
+![](/cnblogs/images/digest/time-series-anomaly-detection.png)
 
 * Types of anomalies
   * *Find outlier data points relative to some standard or usual signal.*
