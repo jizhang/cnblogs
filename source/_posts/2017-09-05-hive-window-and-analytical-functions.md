@@ -6,7 +6,9 @@ tags:
   - sql
 categories:
   - Big Data
+date: 2017-09-05 12:17:10
 ---
+
 
 SQL 结构化查询语言是数据分析领域的重要工具之一。它提供了数据筛选、转换、聚合等操作，并能借助 Hive 和 Hadoop 进行大数据量的处理。但是，传统的 SQL 语句并不能支持诸如分组排名、滑动平均值等计算，原因是 `GROUP BY` 语句只能为每个分组的数据返回一行结果，而非每条数据一行。幸运的是，新版的 SQL 标准引入了窗口查询功能，使用 `WINDOW` 语句我们可以基于分区和窗口为每条数据都生成一行结果记录，这一标准也已得到了 Hive 的支持。
 
@@ -135,7 +137,7 @@ FROM t_employee;
 
 ![点击流](/cnblogs/images/hive-window/clickstream.png)
 
-First, in subquery `b`, we use the `LAG(col)` function to calculate the time difference between current row and previous row, and if it's more than 30 minutes, a new session is marked. Then we do a cumulative sum of the `new_session` field so that each session will get an incremental sequence.
+首先，在子查询 `b` 中，我们借助 `LAG(col)` 函数计算出当前行和上一行的时间差，如果大于 30 分钟则标记为新回话的开始。之后，我们对 `new_session` 字段做累计求和，从而得到一个递增的 ID 序列。
 
 ```sql
 SELECT
@@ -154,17 +156,17 @@ FROM (
 WINDOW x AS (PARTITION BY ipaddress ORDER BY ts);
 ```
 
-## Implementation Detail
+## 窗口查询实现细节
 
-Briefly speaking, window query consists of two steps: divide records into partitions, and evaluate window functions on each of them. The partitioning process is intuitive in map-reduce paradigm, since Hadoop will take care of the shuffling and sorting. However, ordinary UDAF can only return one row for each group, but in window query, there need to be a *table in, table out* contract. So the community introduced Partitioned Table Function (PTF) into Hive.
+简单来说，窗口查询有两个步骤：将记录分割成多个分区，然后在各个分区上调用窗口函数。分区过程对于了解 MapReduce 的用户应该很容易理解，Hadoop 会负责对记录进行打散和排序。但是，传统的 UDAF 函数只能为每个分区返回一条记录，而我们需要的是不仅输入数据是一张表，输出数据也是一张表（table-in, table-out），因此 Hive 社区引入了分区表函数（PTF）。
 
-PTF, as the name suggests, works on partitions, and inputs / outputs a set of table rows. The following sequence diagram lists the major classes of PTF mechanism. `PTFOperator` reads data from sorted source and create input partitions; `WindowTableFunction` manages window frames, invokes window functions (UDAF), and writes the results to output partitions.
+PTF 顾名思义是运行于分区之上、能够处理分区中的记录并输出多行结果的函数。下方的时序图列出了这个过程中重要的一些类。`PTFOperator` 会读取已经排好序的数据，创建相应的“输入分区”；`WindowTableFunction` 则负责管理窗口帧、调用窗口函数（UDAF）、并将结果写入“输出分区”。
 
-![PTF Sequence Diagram](/cnblogs/images/hive-window/window-sequence.png)
+![PTF 时序图](/cnblogs/images/hive-window/window-sequence.png)
 
-The HIVE-896 ticket ([link][2]) contains discussions on introducing analytical window functions into Hive, and this slide ([link][3]), authored by one of the committers, explains how they implemented and merged PTF into Hive.
+HIVE-896（[链接][2]）包含了将分析型函数引入 Hive 的讨论过程；这份演示文档（[链接][3]）则介绍了当时的主要研发团队是如何设计和实现 PTF 的。
 
-## References
+## 参考资料
 
 * https://cwiki.apache.org/confluence/display/Hive/LanguageManual+WindowingAndAnalytics
 * https://github.com/hbutani/SQLWindowing
