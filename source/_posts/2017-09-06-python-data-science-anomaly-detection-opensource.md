@@ -30,7 +30,7 @@ SciKit-Learn 是公认的 Python 机器学习标准类库，它提供了准确�
 
 ## 时间序列数据异常点检测算法
 
-![](/cnblogs/images/digest/time-series-anomaly-detection.png)
+![](/cnblogs/images/digest/anomaly-detection-cart.png)
 
 异常点检测是指寻找那些偏离标准值或正常值的数据点。异常点有几种常见的类型：短期内产生的峰值，包括最大值、最小值、以及零值；长期的数据合计与上一周期的比较等。检测方法也可以归类为两种：对数据点进行分类，标记异常与否；或是对未来数据走势做预测，给出置信区间。
 
