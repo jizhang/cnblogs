@@ -1,8 +1,14 @@
 ---
-title: "2017 Top 15 Python 数据科学类库；时间序列异常点检测；如何加入开源项目"
-categories: [Digest]
-tags: [data science, analytics, opensource]
+title: 2017 Top 15 Python 数据科学类库；时间序列异常点检测；如何加入开源项目
+tags:
+  - data science
+  - analytics
+  - opensource
+categories:
+  - Digest
+date: 2017-09-06 09:49:10
 ---
+
 
 ## 2017 Top 15 Python 数据科学类库
 
@@ -26,37 +32,15 @@ SciKit-Learn 是公认的 Python 机器学习标准类库，它提供了准确�
 
 ![](/cnblogs/images/digest/time-series-anomaly-detection.png)
 
-* Types of anomalies
-  * *Find outlier data points relative to some standard or usual signal.*
-  * additive outlier: unexpected growth in a short period of time, a spike
-  * temporal changes: zero or really low numbers
-  * level shift: conversion rate drop in a funnel
-  * two approaches: label a data point anomaly/not anomaly; forecast confidence interval
-* STL decomposition
-  * seasonal trend loess decomposition
-  * split time series signals into three parts: seasonal, trend, residue
-  * median absolute deviation threshold for residue, Generalized ESD test, [Twitter's library](https://github.com/twitter/AnomalyDetection)
-  * pros: simple; good for additive outlier; use rolling average for level change;
-  * cons: less tweaking options; not good for signals that change dramatically
-* Classification and Regression Trees
-  * teach trees to classify anomaly and non-anomaly data points; requires labeled datasets;
-  * teach CART to predict the next data point, and check if the actual data actual lies inside the confidence interval with Generalized ESD or Grubbs' test; [xgboost library](https://github.com/dmlc/xgboost)
-  * pros: introduce many feature parameters
-  * cons: growing features damage performance
-* ARIMA
-  * use several points from the past to generate a forecast of the next point;
-  * Box Jenkins method
-  * cons: signals shouldn't depend on time
-  * [tsoutliers](https://cran.r-project.org/web/packages/tsoutliers/tsoutliers.pdf) R package
-* Exponential Smoothing
-  * similar to ARIMA
-  * Holt-Winters seasonal method
-* Neural Networks
-  * LSTM
-  * multiple time series coupled with each other
-* To Keep in Mind
-  * try simplest model and algorithm that fit your problem the best
-  * general solution is not always the best
+异常点检测是指寻找那些偏离标准值或正常值的数据点。异常点有几种常见的类型：短期内产生的峰值，包括最大值、最小值、以及零值；长期的数据合计与上一周期的比较等。检测方法也可以归类为两种：对数据点进行分类，标记异常与否；或是对未来数据走势做预测，给出置信区间。
+
+使用 STL 分解法将时间序列数据表示成三个要素：季节性、趋势、残差。通过分析残差的背离程度，引入一定的阈值，就可以作为预警依据了。我们可以使用绝对中位差来作为阈值，推特使用并开源了相关类库（[链接](https://github.com/twitter/AnomalyDetection)）。这种方法的优点是简单，对峰值异常较敏感，并能结合滑动平均来检测周期性的异常。缺点是需要进行调参，且不能检测剧烈变动的指标。
+
+分类和回归树算法有两种使用方式：一种是准备好已标记过异常点的数据集，进行监督型的机器学习；另一种则是让 CART 算法自动寻找数据集中的模式，预测异常点的置信区间。最常用的开源库是 [xgboost](https://github.com/dmlc/xgboost)。这一方法可以用各种特征进行学习和预测，当然计算量也会因此上升。
+
+ARIMA 是一种较为简单的算法，通过历史值来预测下一个数据点的动向。它的特点是每接收一个新的数据点都需要重新构建一次预测模型，并且你的数据必须和时间是无关的。和该算法相似的是指数平滑法，比较有趣的实现是 [Holt-Winters 季节性指标](https://www.otexts.org/fpp/7/5)，用于检测阶段性长期趋势的异常。
+
+人工神经网络也能够进行异常检测，只是这一方式还处于[科研阶段](https://www.elen.ucl.ac.be/Proceedings/esann/esannpdf/es2015-56.pdf)。不过我们想要提醒读者的是，尽量从简单的模型开始，针对你的具体问题进行优化，因为通用的算法并不一定是最优的。
 
 原文：https://blog.statsbot.co/time-series-anomaly-detection-algorithms-1cef5519aef2
 
