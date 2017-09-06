@@ -65,13 +65,8 @@ SQL 窗口查询引入了三个新的概念：窗口分区、窗口帧、以及�
 首先，我们在 Hive 中创建一些有关员工收入的模拟数据：
 
 ```sql
-CREATE t_employee (
-  id INT
-  ,emp_name VARCHAR(20)
-  ,dep_name VARCHAR(20)
-  ,salary DECIMAL(7, 2)
-  ,age DECIMAL(3, 0)
-);
+CREATE TABLE t_employee (id INT, emp_name VARCHAR(20), dep_name VARCHAR(20),
+salary DECIMAL(7, 2), age DECIMAL(3, 0));
 
 INSERT INTO t_employee VALUES
 ( 1,  'Matthew', 'Management',  4500, 55),
@@ -97,7 +92,7 @@ FROM (
     ,RANK() OVER (PARTITION BY dep_name ORDER BY salary DESC) AS rnk
   FROM t_employee
 ) a
-where rnk = 1;
+WHERE rnk = 1;
 ```
 
 通常情况下，`RANK()` 在遇到相同值时会返回同一个排名，并 *跳过* 下一个排名序数。如果想保证排名连续，可以改用 `DENSE_RANK()` 这个函数。
