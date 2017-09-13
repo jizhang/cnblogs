@@ -74,47 +74,47 @@ Apache Beam 有三个重要的基本概念：Pipeline、PCollection、以及 Tra
 
 `CombinePerKey` 的输入源是一系列的二元组（2-element tuple）。这个操作会将元素的第一个元素作为键进行分组，并将相同键的值（第二个元素）组成一个列表。最后，我们使用 `beam.ParDo` 输出统计结果。这个转换函数比较底层，我们会在下文详述。
 
-## Input and Output
+## 输入与输出
 
-Currently, Beam's Python SDK has very limited supports for IO. This table ([source][7]) gives an overview of the available built-in transforms:
+目前，Beam Python SDK 对输入输出的支持十分有限。下表列出了现阶段支持的数据源([资料来源][7])：
 
-| Language | File-based | Messaging | Database |
+| 语言 | 文件系统 | 消息队列 | 数据库 |
 | --- | --- | --- | --- |
 | Java | HDFS<br>TextIO<br>XML | AMQP<br>Kafka<br>JMS | Hive<br>Solr<br>JDBC |
 | Python | textio<br>avroio<br>tfrecordio | - | Google Big Query<br>Google Cloud Datastore |
 
-The following snippet demonstrates the usage of `textio`:
+这段代码演示了如何使用 `textio` 对文本文件进行读写：
 
 ```python
 lines = p | 'Read' >> beam.io.ReadFromText('/path/to/input-*.csv')
 lines | 'Write' >> beam.io.WriteToText('/path/to/output', file_name_suffix='.csv')
 ```
 
-`textio` is able to read multiple input files by using wildcard or you can flatten PCollections created from difference sources. The outputs are also split into several files due to pipeline's parallel processing nature.
+通过使用通配符，`textio` 可以读取多个文件。我们还可以从不同的数据源中读取文件，并用 `Flatten` 方法将多个 `PCollection` 合并成一个。输出文件默认也会是多个，因为 Beam Pipeline 是并发执行的，不同的进程会写入独立的文件。
 
-## Transforms
+## 转换函数
 
-There're basic transforms and higher-level built-ins. In general, we prefer to use the later so that we can focus on the application logic. The following table lists some commonly used higher-level transforms:
+Beam 中提供了基础和上层的转换函数。通常我们更偏向于使用上层函数，这样就可以将精力聚焦在实现业务逻辑上。下面列出来常用的上层转换函数：
 
-| Transform | Meaning |
+| 转换函数 | 功能含义 |
 | --- | --- |
-| Create(value) | Creates a PCollection from an iterable. |
-| Filter(fn) | Use callable `fn` to filter out elements. |
-| Map(fn) | Use callable `fn` to do a one-to-one transformation. |
-| FlatMap(fn) | Similar to `Map`, but `fn` needs to return an iterable of zero or more elements, and these iterables will be flattened into one PCollection. |
-| Flatten() | Merge several PCollections into a single one. |
-| Partition(fn) | Split a PCollection into several partitions. `fn` is a `PartitionFn` or a callable that accepts two arguments - `element`, `num_partitions`. |
-| GroupByKey() | Works on a PCollection of key/value pairs (two-element tuples), groups by common key, and returns `(key, iter<value>)` pairs. |
-| CoGroupByKey() | Groups results across several PCollections by key. e.g. input `(k, v)` and `(k, w)`, output `(k, (iter<v>, iter<w>))`. |
-| RemoveDuplicates() | Get distint values in PCollection. |
-| CombinePerKey(fn) | Similar to `GroupByKey`, but combines the values by a `CombineFn` or a callable that takes an iterable, such as `sum`, `max`. |
-| CombineGlobally(fn) | Reduces a PCollection to a single value by applying `fn`. |
+| Create(value) | 基于内存中的集合数据生成一个 PCollection。|
+| Filter(fn) | 使用 `fn` 函数过滤 PCollection 中的元素。 |
+| Map(fn) | 使用 `fn` 函数做一对一的转换处理。 |
+| FlatMap(fn) | 功能和 `Map` 类似，但是 `fn` 需要返回一个集合，里面包含零个或多个元素，最终 `FlatMap` 会将这些集合合并成一个 PCollection。 |
+| Flatten() | 合并多个 PCollection。 |
+| Partition(fn) | 将一个 PCollection 切分成多个分区。`fn` 可以是 `PartitionFn` 或一个普通函数，能够接受两个参数：`element`、`num_partitions`。 |
+| GroupByKey() | 输入员必须是使用二元组表示的键值对，该方法会按键进行分组，并返回一个 `(key, iter<value>)` 的序列。 |
+| CoGroupByKey() | 对多个二元组 PCollection 按相同键进行合并，如输入的是 `(k, v)` 和 `(k, w)`，则输出 `(k, (iter<v>, iter<w>))`。 |
+| RemoveDuplicates() | 对 PCollection 的元素进行去重。 |
+| CombinePerKey(fn) | 功能和 `GroupByKey` 类似，但会进一步使用 `fn` 对值列表进行合并。`fn` 可以是一个 `CombineFn`，或是一个普通函数，接收序列并返回结果，如 `sum`、`max` 函数等。 |
+| CombineGlobally(fn) | 使用 `fn` 将整个 PCollection 合并计算成单个值。 |
 
-### Callable, DoFn, and ParDo
+### Callable, DoFn, ParDo
 
-Most transforms accepts a callable as argument. In Python, [callable][8] can be a function, method, lambda expression, or class instance that has `__call__` method. Under the hood, Beam will wrap the callable as a `DoFn`, and all these transforms will invoke `ParDo`, the lower-level transform, with the `DoFn`.
+可以看到，多数转换函数都会接收另一个函数（Callable）做为参数。在 Python 中，[Callable][8] 可以是一个函数、类方法、Lambda 表达式、或是任何包含 `__call__` 方法的对象实例。Beam 会将这些函数包装成一个 `DoFn` 类，所有转换函数最终都会调用最基础的 `ParDo` 函数，并将 `DoFn` 传递给它。
 
-Let's replace the expression `lambda x: x.split(' ')` with a `DoFn` class:
+我们可以尝试将 `lambda x: x.split(' ')` 这个表达式转换成 `DoFn` 类：
 
 ```python
 class SplitFn(beam.DoFn):
@@ -124,7 +124,7 @@ class SplitFn(beam.DoFn):
 lines | beam.ParDo(SplitFn())
 ```
 
-The `ParDo` transform works like `FlatMap`, except that it only accepts `DoFn`. In addition to `return`, we can `yield` element from `process` method:
+`ParDo` 转换和 `FlatMap` 的功能类似，只是它的 `fn` 参数必须是一个 `DoFn`。除了使用 `return`，我们还可以用 `yield` 语句来返回结果：
 
 ```python
 class SplitAndPairWithOneFn(beam.DoFn):
@@ -133,46 +133,46 @@ class SplitAndPairWithOneFn(beam.DoFn):
             yield (word, 1)
 ```
 
-### Combiner Functions
+### 合并函数
 
-Combiner functions, or `CombineFn`, are used to reduce a collection of elements into a single value. You can either perform on the entire PCollection (`CombineGlobally`), or combine the values for each key (`CombinePerKey`). Beam is capable of wrapping callables into `CombinFn`. The callable should take an iterable and returns a single value. Since Beam distributes computation to multiple nodes, the combiner function will be invoked multiple times to get partial results, so they ought to be [commutative][9] and [associative][10]. `sum`, `min`, `max` are good examples.
+合并函数（`CombineFn`）用来将集合数据合并计算成单个值。我们既可以对整个 PCollection 做合并（`CombineGlobally`），也可以计算每个键的合并结果（`CombinePerKey`）。Beam 会将普通函数（Callable）包装成 `CombineFn`，这些函数需要接收一个集合，并返回单个结果。需要注意的是，Beam 会将计算过程分发到多台服务器上，会被多次调用来计算中间结果，因此合并函数需要满足[交换律][9]和[结合律][10]。`sum`、`min`、`max` 是符合这样的要求的。
 
-Beam provides some built-in combiners like count, mean, top. Take count for instance, the following two lines are equivalent, they return the total count of lines.
+Beam 提供了许多内置的合并函数，如计数、求平均值、排序等。以计数为例，下面两种写法都可以用来统计整个 PCollection 中元素的个数：
 
 ```python
 lines | beam.combiners.Count.Globally()
 lines | beam.CombineGlobally(beam.combiners.CountCombineFn())
 ```
 
-Other combiners can be found in Beam Python SDK Documentation ([link][12]). For more complex combiners, we need to subclass the `CombinFn` and implement four methods. Take the built-in `Mean` for an example:
+其他合并函数可以参考 Python SDK 的官方文档（[链接][12]）。我们也可以自行实现合并函数，只需继承 `CombineFn`，并实现四个方法。我们以内置的 `Mean` 平均值合并函数的源码为例：
 
 [`apache_beam/transforms/combiners.py`][11]
 
 ```python
 class MeanCombineFn(core.CombineFn):
   def create_accumulator(self):
-    """Create a "local" accumulator to track sum and count."""
+    """创建一个“本地”的中间结果，记录合计值和记录数。"""
     return (0, 0)
 
   def add_input(self, (sum_, count), element):
-    """Process the incoming value."""
+    """处理新接收到的值。"""
     return sum_ + element, count + 1
 
   def merge_accumulators(self, accumulators):
-    """Merge several accumulators into a single one."""
+    """合并多个中间结果。"""
     sums, counts = zip(*accumulators)
     return sum(sums), sum(counts)
 
   def extract_output(self, (sum_, count)):
-    """Compute the mean average."""
+    """计算平均值。"""
     if count == 0:
       return float('NaN')
     return sum_ / float(count)
 ```
 
-### Composite Transform
+### 复合转换函数
 
-Take a look at the [source code][13] of `beam.combiners.Count.Globally` we used before. It subclasses `PTransform` and applies some transforms to the PCollection. This forms a sub-graph of DAG, and we call it composite transform. Composite transforms are used to gather relative codes into logical modules, making them easy to understand and maintain.
+我们简单看一下上文中使用到的 `beam.combiners.Count.Globally` 的源码（[链接][13]），它继承了 `PTransform` 类，并在 `expand` 方法中对 PCollection 应用了转换函数。这会形成一个小型的有向无环图，并合并到最终的 DAG 中。我们称其为复合转换函数，主要用于将相关的转换逻辑整合起来，便于理解和管理。
 
 ```python
 class Count(object):
@@ -181,25 +181,25 @@ class Count(object):
       return pcoll | core.CombineGlobally(CountCombineFn())
 ```
 
-More built-in transforms are listed below:
+更多内置的复合转换函数如下表所示：
 
-| Transform | Meaning |
+| 复合转换函数 | 功能含义 |
 | --- | --- |
-| Count.Globally() | Count the total number of elements. |
-| Count.PerKey() | Count number elements of each unique key. |
-| Count.PerElement() | Count the occurrences of each element. |
-| Mean.Globally() | Compute the average of all elements. |
-| Mean.PerKey() | Compute the averages for each key. |
-| Top.Of(n, reverse) | Get the top `n` elements from the PCollection. See also Top.Largest(n), Top.Smallest(n). |
-| Top.PerKey(n, reverse) | Get top `n` elements for each key. See also Top.LargestPerKey(n), Top.SmallestPerKey(n) |
-| Sample.FixedSizeGlobally(n) | Get a sample of `n` elements. |
-| Sample.FixedSizePerKey(n) | Get samples from each key. |
-| ToList() | Combine to a single list. |
-| ToDict() | Combine to a single dict. Works on 2-element tuples. |
+| Count.Globally() | 计算元素总数。 |
+| Count.PerKey() | 计算每个键的元素数。 |
+| Count.PerElement() | 计算每个元素出现的次数，类似 Wordcount。 |
+| Mean.Globally() | 计算所有元素的平均值。 |
+| Mean.PerKey() | 计算每个键的元素平均值。 |
+| Top.Of(n, reverse) | 获取 PCollection 中最大或最小的 `n` 个元素，另有 Top.Largest(n), Top.Smallest(n). |
+| Top.PerKey(n, reverse) | 获取每个键的值列表中最大或最小的 `n` 个元素，另有 Top.LargestPerKey(n), Top.SmallestPerKey(n) |
+| Sample.FixedSizeGlobally(n) | 随机获取 `n` 个元素。 |
+| Sample.FixedSizePerKey(n) | 随机获取每个键下的 `n` 个元素。 |
+| ToList() | 将 PCollection 合并成一个列表。 |
+| ToDict() | 将 PCollection 合并成一个哈希表，输入数据需要是二元组集合。 |
 
-## Windowing
+## 时间窗口
 
-When processing event data, such as access log or click stream, there's an *event time* property attached to every item, and it's common to perform aggregation on a per-time-window basis. With Beam, we can define different kinds of windows to divide event data into groups. Windowing can be used in both bounded and unbounded data source. Since current Python SDK only supports bounded source, the following example will work on an offline access log file, but the process can be applied to unbounded source as is.
+在处理事件数据时，如访问日志、用户点击流，每条数据都会有一个 *事件时间* 属性，而通常我们会按事件时间对数据进行分组统计，这些分组即时间窗口。在 Beam 中，我们可以定义不同的时间窗口类型，能够支持有界和无界数据。由于 Python SDK 暂时只支持有界数据，我们就以一个离线访问日志文件作为输入源，统计每个时间窗口的记录条数。对于无界数据，概念和处理流程也是类似的。
 
 ```
 64.242.88.10 - - [07/Mar/2004:16:05:49 -0800] "GET /edit HTTP/1.1" 401 12846
@@ -209,7 +209,7 @@ When processing event data, such as access log or click stream, there's an *even
 64.242.88.10 - - [07/Mar/2004:16:20:55 -0800] "GET /view HTTP/1.1" 200 5253
 ```
 
-`logmining.py`, full source code can be found on GitHub ([link][14]).
+`logmining.py` 的完成源码可以在 GitHub（[链接][14]）中找到：
 
 ```python
 lines = p | 'Create' >> beam.io.ReadFromText('access.log')
@@ -236,15 +236,15 @@ First of all, we need to add a timestamp to each record. `extract_timestamp` is 
 
 In stream processing for unbounded source, event data will arrive in different order, so we need to deal with late data with Beam's watermark and trigger facility. This is a rather advanced topic, and the Python SDK has not yet implemented this feature. If you're interested, please refer to Stream [101][4] and [102][15] articles.
 
-## Pipeline Runner
+## Pipeline 运行时
 
-As metioned above, Apache Beam is just a standard that provides SDK and APIs. It's the pipeline runner that is reponsible to execute the workflow graph. The following matrix lists all available runners and their capabilities compared to Beam Model.
+As mentioned above, Apache Beam is just a standard that provides SDK and APIs. It's the pipeline runner that is responsible to execute the workflow graph. The following matrix lists all available runners and their capabilities compared to Beam Model.
 
-![Beam Capability Matrix](/cnblogs/images/beam/matrix.png)
+![Beam 运行时能力矩阵](/cnblogs/images/beam/matrix.png)
 
-[Source](https://beam.apache.org/documentation/runners/capability-matrix/)
+[图片来源](https://beam.apache.org/documentation/runners/capability-matrix/)
 
-## References
+## 参考资料
 
 * https://beam.apache.org/documentation/programming-guide/
 * https://beam.apache.org/documentation/sdks/pydoc/2.1.0/
