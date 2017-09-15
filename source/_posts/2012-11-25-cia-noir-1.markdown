@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Clojure实战(1)：使用Noir框架开发博客(上)"
+title: "Clojure 实战(1)：使用 Noir 框架开发博客(上)"
 date: 2012-11-25 16:58
 comments: true
-categories: Tutorial
-tags: [clojure, noir]
+categories: Programming
+tags: [clojure, noir, tutorial]
 ---
 
 前言
@@ -249,7 +249,7 @@ defpage是Noir的一个宏，用来定义URL和它返回的页面内容。URL的
 (ns ...
   (:use ...
         [hiccup.page-helpers :only [html4]]))
-        
+
 (defpage "/greeting" []
          (html4
            [:head

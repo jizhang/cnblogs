@@ -1,9 +1,10 @@
 ---
 layout: post
-title: "使用Spring AOP向领域模型注入依赖"
+title: "使用 Spring AOP 向领域模型注入依赖"
 date: 2015-09-12 22:03
 comments: true
-categories: [Notes]
+categories: [Programming]
+tags: [spring, aop]
 published: true
 ---
 

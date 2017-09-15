@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Clojure实战(2)：使用Noir框架开发博客(中)"
+title: "Clojure 实战(2)：使用 Noir 框架开发博客(中)"
 date: 2012-12-08 12:09
 comments: true
-categories: Tutorial
-tags: [clojure, noir]
+categories: Programming
+tags: [clojure, noir, tutorial]
 ---
 
 在Eclipse中编写Clojure代码

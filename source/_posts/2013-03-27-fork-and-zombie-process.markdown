@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "fork()与僵尸进程"
+title: "fork() 与僵尸进程"
 date: 2013-03-27 20:18
 comments: true
-categories: Notes
-tags: [programming]
+categories: Programming
+tags: [unix, c]
 ---
 
 使用fork()函数派生出多个子进程来并行执行程序的不同代码块，是一种常用的编程泛型。特别是在网络编程中，父进程初始化后派生出指定数量的子进程，共同监听网络端口并处理请求，从而达到扩容的目的。
@@ -200,4 +200,3 @@ if ($pid > 0) {
 * [waitpid(2) - Linux man page](http://linux.die.net/man/2/waitpid)
 * [UNIX环境高级编程（英文版）（第2版）](http://book.jd.com/10137688.html)
 * [Linux多进程相关内容](http://tech.idv2.com/2006/10/14/linux-multiprocess-info/)
-

@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Nginx热升级"
+title: "Nginx 热升级"
 date: 2012-12-23 22:11
 comments: true
-categories: Notes
+categories: Programming
 tags: [nginx]
 published: true
 ---
@@ -38,9 +38,9 @@ prey:~ root# ps -ef|grep nginx
 ```bash
 prey:~ root# kill -WINCH 127
 prey:~ root# ps -ef|grep nginx
- 127     1   nginx: master process /usr/local/nginx-1.2.4/sbin/nginx 
+ 127     1   nginx: master process /usr/local/nginx-1.2.4/sbin/nginx
 5180   127   nginx: master process /usr/local/nginx-1.2.4/sbin/nginx
-5182  5180   nginx: worker process 
+5182  5180   nginx: worker process
 ```
 
 5、如果这时需要回退，可向原Nginx主进程发送`HUP`信号，它会重新启动工作进程， **仍使用旧版配置文件** 。尔后可以将新版Nginx进程杀死（使用`QUIT`、`TERM`、或者`KILL`）：
@@ -90,12 +90,12 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
 
         // 信号回调函数定义在 src/os/unix/ngx_process.c 中，
         // 它只负责设置全局变量，实际处理逻辑在这里。
-        if (ngx_change_binary) { 
+        if (ngx_change_binary) {
             ngx_change_binary = 0;
             ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0, "changing binary");
             ngx_new_binary = ngx_exec_new_binary(cycle, ngx_argv);
         }
-        
+
     }
 }
 ```
@@ -181,4 +181,3 @@ Nginx信号汇总
 $ sbin/nginx -s reload
 $ kill -HUP $(cat logs/nginx.pid)
 ```
-

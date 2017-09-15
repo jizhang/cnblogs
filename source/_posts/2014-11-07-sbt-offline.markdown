@@ -1,9 +1,10 @@
 ---
 layout: post
-title: "离线环境下构建sbt项目"
+title: "离线环境下构建 sbt 项目"
 date: 2014-11-07 15:02
 comments: true
-categories: [Notes]
+categories: [Programming]
+tags: [scala]
 published: true
 ---
 

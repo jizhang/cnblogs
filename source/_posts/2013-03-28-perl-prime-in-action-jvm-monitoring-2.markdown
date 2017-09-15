@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Perl入门实战：JVM监控脚本（下）"
+title: "Perl 入门实战：JVM 监控脚本（下）"
 date: 2013-03-28 15:28
 comments: true
-categories: Tutorial
-tags: [perl]
+categories: Programming
+tags: [perl, tutorial]
 ---
 
 套接字

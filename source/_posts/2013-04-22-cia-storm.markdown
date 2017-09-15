@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Clojure实战(5)：Storm实时计算框架"
+title: "Clojure 实战(5)：Storm 实时计算框架"
 date: 2013-04-22 12:11
 comments: true
-categories: [Tutorial, Big Data]
-tags: [clojure, storm]
+categories: [Big Data]
+tags: [clojure, storm, tutorial]
 published: true
 ---
 

@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Hive并发情况下报DELETEME表不存在的异常"
+title: "Hive 并发情况下报 DELETEME 表不存在的异常"
 date: 2013-09-06 11:20
 comments: true
-categories: [Notes, Big Data]
+categories: [Big Data]
 tag: [hive]
 published: true
 ---

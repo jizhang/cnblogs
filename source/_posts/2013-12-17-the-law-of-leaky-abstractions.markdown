@@ -3,7 +3,8 @@ layout: post
 title: "抽象泄漏定律"
 date: 2013-12-17 13:05
 comments: true
-categories: Translation
+categories: Programming
+tags: [translation]
 published: true
 ---
 

@@ -1,9 +1,10 @@
 ---
 layout: post
-title: "Java反射机制"
+title: "Java 反射机制"
 date: 2014-01-25 09:42
 comments: true
-categories: [Translation, Tutorial]
+categories: Programming
+tags: [translation]
 published: true
 ---
 
@@ -90,14 +91,14 @@ Servlet也会使用相同的机制：
 ```java
 package myreflection;
 import java.lang.reflect.Method;
- 
+
 public class ReflectionHelloWorld {
     public static void main(String[] args){
         Foo f = new Foo();
         System.out.println(f.getClass().getName());			
     }
 }
- 
+
 class Foo {
     public void print() {
         System.out.println("abc");
@@ -118,11 +119,11 @@ myreflection.Foo
 ```java
 package myreflection;
 import java.lang.reflect.Method;
- 
+
 public class ReflectionHelloWorld {
     public static void main(String[] args){
         Foo f = new Foo();
- 
+
         Method method;
         try {
             method = f.getClass().getMethod("print", new Class<?>[0]);
@@ -132,7 +133,7 @@ public class ReflectionHelloWorld {
         }           
     }
 }
- 
+
 class Foo {
     public void print() {
         System.out.println("abc");
@@ -148,7 +149,7 @@ abc
 
 ```java
 package myreflection;
- 
+
 public class ReflectionHelloWorld {
     public static void main(String[] args){
         // 创建Class实例
@@ -158,20 +159,20 @@ public class ReflectionHelloWorld {
         }catch(Exception e){
             e.printStackTrace();
         }
- 
+
         // 创建Foo实例
         Foo f = null;
- 
+
         try {
             f = (Foo) c.newInstance();
         } catch (Exception e) {
             e.printStackTrace();
         }   
- 
+
         f.print();
     }
 }
- 
+
 class Foo {
     public void print() {
         System.out.println("abc");
@@ -183,9 +184,9 @@ class Foo {
 
 ```java
 package myreflection;
- 
+
 import java.lang.reflect.Constructor;
- 
+
 public class ReflectionHelloWorld {
     public static void main(String[] args){
         // 创建Class实例
@@ -195,35 +196,35 @@ public class ReflectionHelloWorld {
         }catch(Exception e){
             e.printStackTrace();
         }
- 
+
         // 创建Foo实例
         Foo f1 = null;
         Foo f2 = null;
- 
+
         // 获取所有的构造函数
         Constructor<?> cons[] = c.getConstructors();
- 
+
         try {
             f1 = (Foo) cons[0].newInstance();
             f2 = (Foo) cons[1].newInstance("abc");
         } catch (Exception e) {
             e.printStackTrace();
         }   
- 
+
         f1.print();
         f2.print();
     }
 }
- 
+
 class Foo {
-    String s; 
- 
+    String s;
+
     public Foo(){}
- 
+
     public Foo(String s){
         this.s=s;
     }
- 
+
     public void print() {
         System.out.println(s);
     }
@@ -241,40 +242,40 @@ abc
 
 ```java
 package myreflection;
- 
+
 import java.lang.reflect.Array;
- 
+
 public class ReflectionHelloWorld {
     public static void main(String[] args) {
         int[] intArray = { 1, 2, 3, 4, 5 };
         int[] newIntArray = (int[]) changeArraySize(intArray, 10);
         print(newIntArray);
- 
+
         String[] atr = { "a", "b", "c", "d", "e" };
         String[] str1 = (String[]) changeArraySize(atr, 10);
         print(str1);
     }
- 
+
     // 修改数组的大小
     public static Object changeArraySize(Object obj, int len) {
         Class<?> arr = obj.getClass().getComponentType();
         Object newArray = Array.newInstance(arr, len);
- 
+
         // 复制数组
         int co = Array.getLength(obj);
         System.arraycopy(obj, 0, newArray, 0, co);
         return newArray;
     }
- 
+
     // 打印
     public static void print(Object obj) {
         Class<?> c = obj.getClass();
         if (!c.isArray()) {
             return;
         }
- 
+
         System.out.println("\nArray length: " + Array.getLength(obj));
- 
+
         for (int i = 0; i < Array.getLength(obj); i++) {
             System.out.print(Array.get(obj, i) + " ");
         }
@@ -286,9 +287,9 @@ public class ReflectionHelloWorld {
 
 ```text
 Array length: 10
-1 2 3 4 5 0 0 0 0 0 
+1 2 3 4 5 0 0 0 0 0
 Array length: 10
-a b c d e null null null null null 
+a b c d e null null null null null
 ```
 
 ## 总结

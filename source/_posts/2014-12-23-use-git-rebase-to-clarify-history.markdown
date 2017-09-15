@@ -1,9 +1,10 @@
 ---
 layout: post
-title: "使用git rebase让历史变得清晰"
+title: "使用 git rebase 让历史变得清晰"
 date: 2014-12-23 16:10
 comments: true
-categories: [Notes]
+categories: [Programming]
+tags: [git]
 published: true
 ---
 
@@ -97,4 +98,3 @@ $ git push origin master
 ![](/cnblogs/images/git-rebase/no-ff.png)
 
 可以看到，Merge branch 'feature-branch'那段可以很好的展现出这些提交是属于某一特性的。
-

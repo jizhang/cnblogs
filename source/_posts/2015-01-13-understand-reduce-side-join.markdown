@@ -1,9 +1,10 @@
 ---
 layout: post
-title: "深入理解Reduce-side Join"
+title: "深入理解 Reduce-side Join"
 date: 2015-01-13 14:20
 comments: true
 tags: [hadoop, mapreduce]
+categories: Big Data
 published: true
 ---
 
@@ -46,7 +47,7 @@ public class TaggedKey implements WritableComparable<TaggedKey> {
         }
         return compareValue;
     }
-    
+
     // 此处省略部分代码
 }
 ```

@@ -1,8 +1,8 @@
 ---
-title: 开发人员必知的5种开源框架
+title: 开发人员必知的 5 种开源框架
 date: 2016-03-13 16:25
 categories: [Programming]
-tags: [translation]
+tags: [translation, bootstrap, angular, spring, spark, docker]
 ---
 
 作者：[John Esposito](https://opensource.com/business/15/12/top-5-frameworks)

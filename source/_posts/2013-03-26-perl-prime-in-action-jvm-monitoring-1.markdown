@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Perl入门实战：JVM监控脚本（上）"
+title: "Perl 入门实战：JVM 监控脚本（上）"
 date: 2013-03-26 23:00
 comments: true
-categories: Tutorial
-tags: [perl]
+categories: Programming
+tags: [perl, tutorial]
 ---
 
 由于最近在搭建Zabbix监控服务，需要制作各类监控的模板，如iostat、Nginx、MySQL等，因此会写一些脚本来完成数据采集的工作。又因为近期对Perl语言比较感兴趣，因此决定花些时间学一学，写一个脚本来练练手，于是就有了这样一份笔记。
@@ -191,10 +191,10 @@ sub kv_parse {
     my @kv_data = @_;
 
     map { s/^\s+|\s+$// } @kv_data;
-    
+
     my @kv_keys = split(/\s+/, $kv_data[0]);
     my @kv_vals = split(/\s+/, $kv_data[1]);
-    
+
     my $result = '';
     for my $i (0 .. $#kv_keys) {
         $result .= "$kv_keys[$i] $kv_vals[$i]\n";

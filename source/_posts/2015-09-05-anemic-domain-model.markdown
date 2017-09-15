@@ -3,7 +3,8 @@ layout: post
 title: "贫血领域模型"
 date: 2015-09-05 19:02
 comments: true
-categories: [Translation]
+categories: [Programming]
+tags: [translation]
 published: true
 ---
 

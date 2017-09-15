@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Apache HBase的适用场景"
+title: "Apache HBase 的适用场景"
 date: 2015-03-08 08:03
 comments: true
 categories: [Big Data]

@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "开源软件架构 - 卷1：第14章 Python打包工具"
+title: "开源软件架构 - 卷1：第14章 Python 打包工具"
 date: 2012-11-18 19:20
 comments: true
-categories: Translation
-tags: [aosa, python]
+categories: Programming
+tags: [aosa, python, translation]
 ---
 
 作者：[Tarek Ziadé](http://www.aosabook.org/en/intro1.html#ziade-tarek)，翻译：[张吉](mailto:zhangji87@gmail.com)
@@ -612,7 +612,7 @@ home-page = http://bitbucket.org/tarek/pypi2rpm
 project-url: Repository, http://hg.mozilla.org/services/server-devtools
 classifier = Development Status :: 3 - Alpha
     License :: OSI Approved :: Mozilla Public License 1.1 (MPL 1.1)
-    
+
 [files]
 packages =
         mopytools

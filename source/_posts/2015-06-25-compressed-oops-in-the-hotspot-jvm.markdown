@@ -1,9 +1,10 @@
 ---
 layout: post
-title: "HotSpot JVM中的对象指针压缩"
+title: "HotSpot JVM 中的对象指针压缩"
 date: 2015-06-25 17:41
 comments: true
-categories: [Translation]
+categories: [Programming]
+tags: [java, jvm]
 published: true
 ---
 

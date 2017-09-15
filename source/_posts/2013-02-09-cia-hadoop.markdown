@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Clojure实战(4)：编写Hadoop MapReduce脚本"
+title: "Clojure 实战(4)：编写 Hadoop MapReduce 脚本"
 date: 2013-02-09 16:43
 comments: true
-categories: [Tutorial, Big Data]
-tags: [clojure, hadoop]
+categories: [Big Data]
+tags: [clojure, hadoop, tutorial]
 ---
 
 Hadoop简介

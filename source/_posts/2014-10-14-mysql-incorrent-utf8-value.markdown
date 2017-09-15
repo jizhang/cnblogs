@@ -1,9 +1,10 @@
 ---
 layout: post
-title: "MySQL异常UTF-8字符的处理"
+title: "MySQL 异常 UTF-8 字符的处理"
 date: 2014-10-14 13:16
 comments: true
-categories: [Notes]
+categories: [Programming]
+tags: [mysql, etl]
 published: true
 ---
 
@@ -42,7 +43,7 @@ SELECT REGEXP_REPLACE(content, '[^\\u0000-\\uFFFF]', '') FROM ...
 读取它的程序知道这是以UTF-8编码保存的字符串，因此将其解析为以下编号：
 
 ```
-104 101 108 108 111 
+104 101 108 108 111
 ```
 
 又因为UTF-8编码对应的字符集是Unicode，所以上面这五个编号对应的字符便是“hello”。

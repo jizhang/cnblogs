@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "柯里化与偏应用（JavaScript描述）"
+title: "柯里化与偏应用（JavaScript 描述）"
 date: 2013-03-07 20:59
 comments: true
-categories: Translation
-tags: [fp, javascript]
+categories: Programming
+tags: [functional programming, javascript, translation]
 ---
 
 原文：[http://raganwald.com/2013/03/07/currying-and-partial-application.html](http://raganwald.com/2013/03/07/currying-and-partial-application.html)
