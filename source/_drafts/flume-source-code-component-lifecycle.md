@@ -7,11 +7,11 @@ tags:
 categories: Big Data
 ---
 
-[Apache Flume](https://flume.apache.org/) is a real-time ETL tool for data warehouse platform. It consists of different types of components, and during runtime all of them are managed by Flume's lifecycle and supervisor mechanism. This article will walk you through the source code of Flume's component lifecycle management.
+[Apache Flume](https://flume.apache.org/) 是数据仓库体系中用于做实时 ETL 的工具。它提供了丰富的数据源和写入组件，这些组件在运行时都由 Flume 的生命周期管理机制进行监控和维护。本文将对这部分功能的源码进行解析。
 
 ## 项目结构
 
-Flume's source code can be downloaded from GitHub. It's a Maven project, so we can import it into an IDE for efficient code reading. The following is the main structure of the project:
+Flume 的源码可以从 GitHub 上下载。它是一个 Maven 项目，我们将其导入到 IDE 中以便更好地进行源码阅读。以下是代码仓库的基本结构：
 
 ```
 /flume-ng-node
@@ -24,7 +24,7 @@ Flume's source code can be downloaded from GitHub. It's a Maven project, so we c
 
 ## 程序入口
 
-The `main` entrance of Flume agent is in the `org.apache.flume.node.Application` class of `flume-ng-node` module. Following is an abridged source code:
+Flume Agent 的入口 `main` 函数位于 `flume-ng-node` 模块的 `org.apache.flume.node.Application` 类中。下列代码是该函数的摘要：
 
 ```java
 public class Application {
@@ -52,31 +52,31 @@ public class Application {
 }
 ```
 
-The process can be illustrated as follows:
+启动过程说明如下：
 
-1. Parse command line arguments with `commons-cli`, including the Flume agent's name, configuration method and path.
-2. Configurations can be provided via properties file or ZooKeeper. Both provider support live-reload, i.e. we can update component settings without restarting the agent.
-    * File-based live-reload is implemented by using a background thread that checks the last modification time of the file.
-    * ZooKeeper-based live-reload is provided by Curator's `NodeCache` recipe, which uses ZooKeeper's *watch* functionality underneath.
-3. If live-reload is on (by default), configuration providers will add themselves into the application's component list, and after calling `Application#start`, a `LifecycleSupervisor` will start the provider, and trigger the reload event to parse the configuration and load all defined components.
-4. If live-reload is off, configuration providers will parse the file immediately and start all components, also supervised by `LifecycleSupervisor`.
-5. Finally add a JVM shutdown hook by `Runtime#addShutdownHook`, which in turn invokes `Application#stop` to shutdown the Flume agent.
+1. 使用 `commons-cli` 对命令行参数进行解析，提取 Agent 名称、配置信息读取方式及其路径信息；
+2. 配置信息可以通过文件或 ZooKeeper 的方式进行读取，两种方式都支持热加载，即我们不需要重启 Agent 就可以更新配置内容：
+    * 基于文件的配置热加载是通过一个后台线程对文件进行轮询实现的；
+    * 基于 ZooKeeper 的热加载则是使用了 Curator 的 `NodeCache` 模式，底层是 ZooKeeper 原生的监听（Watch）特性。
+3. 如果配置热更新是开启的（默认开启），配置提供方 `ConfigurationProvider` 就会将自身注册到 Agent 程序的组件列表中，并在 `Application#start` 方法调用后，由 `LifecycleSupervisor` 类进行启动和管理，加载和解析配置文件，从中读取组件列表。
+4. 如果热更新未开启，则配置提供方将在启动时立刻读取配置文件，并由 `LifecycleSupervisor` 启动和管理所有组件。
+5. 最后，`main` 会调用 `Runtime#addShutdownHook`，当 JVM 关闭时（SIGTERM 或者 Ctrl+C），`Application#stop` 会被用于关闭 Flume Agent，使各组件优雅退出。
 
 <!-- more -->
 
 ## 配置重载
 
-In `PollingPropertiesFileConfigurationProvider`, when it detects file changes, it will invoke the `AbstractConfigurationProvider#getConfiguration` method to parse the configuration file into an `MaterializedConfiguration` instance, which contains the source, sink, and channel definitions. And then, the polling thread send an event to `Application` via a Guava's `EventBus` instance, which effectively invokes the `Application#handleConfigurationEvent` method to reload all components.
+在 `PollingPropertiesFileConfigurationProvider` 类中，当文件内容更新时，它会调用父类的 `AbstractConfigurationProvider#getConfiguration` 方法，将配置内容解析成 `MaterializedConfiguration` 实例，这个对象实例中包含了数据源（Source）、目的地（Sink）、以及管道（Channel）组件的所有信息。随后，这个轮询线程会通过 Guava 的 `EventBus` 机制通知 `Application` 类配置发生了更新，从而触发 `Application#handleConfigurationEvent` 方法，重新加载所有的组件。
 
 ```java
-// Application class
+// Application 类
 @Subscribe
 public synchronized void handleConfigurationEvent(MaterializedConfiguration conf) {
   stopAllComponents();
   startAllComponents(conf);
 }
 
-// PollingPropertiesFileConfigurationProvider$FileWatcherRunnable
+// PollingPropertiesFileConfigurationProvider$FileWatcherRunnable 内部类
 @Override
 public void run() {
   eventBus.post(getConfiguration());
@@ -85,7 +85,7 @@ public void run() {
 
 ## 启动组件
 
-The starting process lies in `Application#startAllComponents`. The method accepts a new set of components, starts the `Channel`s first, followed by `Sink`s and `Source`s.
+组件启动的流程位于 `Application#startAllComponents` 方法中。这个方法接收到新的组件信息后，首先将启动所有的 `Channel`，然后启动 `Sink` 和 `Source`。
 
 ```java
 private void startAllComponents(MaterializedConfiguration materializedConfiguration) {
@@ -95,18 +95,18 @@ private void startAllComponents(MaterializedConfiguration materializedConfigurat
     supervisor.supervise(entry.getValue(),
         new SupervisorPolicy.AlwaysRestartPolicy(), LifecycleState.START);
   }
-  //  Wait for all channels to start.
+  //  等待所有管道启动完毕
   for (Channel ch : materializedConfiguration.getChannels().values()) {
     while (ch.getLifecycleState() != LifecycleState.START
         && !supervisor.isComponentInErrorState(ch)) {
       Thread.sleep(500);
     }
   }
-  // Start and supervise sinkds and sources
+  // 相继启动目的地和数据源组件
 }
 ```
 
-The `LifecycleSupervisor` manages instances that implement `LifecycleAware` interface. Supervisor will schedule a `MonitorRunnable` instance with a fixed delay (3 secs), which tries to convert a `LifecycleAware` instance into its `desiredState`, by calling `LifecycleAware#start` or `stop`.
+`LifecycleSupervisor` 类（代码中的 `supervisor` 变量）可用于管理实现了 `LifecycleAware` 接口的组件。该类会初始化一个 `MonitorRunnable`，每三秒轮询一次组件状态，通过 `LifecycleAware#start` 和 `stop` 方法，保证其始终处于 `desiredState` 变量所指定的状态。
 
 ```java
 public static class MonitorRunnable implements Runnable {
@@ -128,7 +128,7 @@ public static class MonitorRunnable implements Runnable {
 
 ## 停止组件
 
-When JVM is shutting down, the hook invokes `Application#stop`, which calls `LifecycleSupervisor#stop`, that first shutdowns the `MonitorRunnable`s' executor pool, and changes all components' desired status to `STOP`, waiting for them to fully shutdown.
+当 JVM 关闭时，钩子函数会调用 `Application#stop` 方法，进而调用 `LifecycleSupervisor#stop`。该方法首先停止所有的 `MonitorRunnable` 线程，将组件目标状态置为 `STOP`，并调用 `LifecycleAware#stop` 方法命其优雅终止。
 
 ```java
 public class LifecycleSupervisor implements LifecycleAware {
@@ -148,7 +148,7 @@ public class LifecycleSupervisor implements LifecycleAware {
 
 ## Source 与 SourceRunner
 
-Take `KafkaSource` for an instance, we shall see how agent supervises source components, and the same thing happens to sinks and channels.
+对于单个组件的生命周期，我们以 `KafkaSource` 为例：
 
 ```java
 public class KafkaSource extends AbstractPollableSource {
@@ -165,7 +165,7 @@ public class KafkaSource extends AbstractPollableSource {
 }
 ```
 
-`KafkaSource` is a pollable source, which means it needs a runner thread to constantly poll for more data to process.
+`KafkaSource` 被定义成轮询式的数据源，也就是说我们需要使用一个线程不断对其进行轮询，查看是否有数据可以供处理：
 
 ```java
 public class PollableSourceRunner extends SourceRunner {
@@ -186,6 +186,7 @@ public class PollableSourceRunner extends SourceRunner {
     lifecycleState = LifecycleState.STOP;
   }
 
+  // 轮询线程
   public static class PollingRunner implements Runnable {
     @Override
     public void run() {
@@ -197,7 +198,7 @@ public class PollableSourceRunner extends SourceRunner {
 }
 ```
 
-Both `AbstractPollableSource` and `SourceRunner` are subclass of `LifecycleAware`, which means they have `start` and `stop` methods for supervisor to call. In this case, `SourceRunner` is the component that Flume agent actually supervises, and `PollableSource` is instantiated and managed by `SourceRunner`. Details lie in `AbstractConfigurationProvider#loadSources`:
+`AbstractPollableSource` 和 `SourceRunner` 都实现了 `LifecycleAware` 接口，因此都有 `start` 和 `stop` 方法。但是，只有 `SourceRunner` 会由 `LifecycleSupervisor` 管理，`PollableSource` 则是附属于 `SourceRunner` 的一个组件。我们可以在 `AbstractConfigurationProvider#loadSources` 中看到配置关系：
 
 ```java
 private void loadSources(Map<String, SourceRunner> sourceRunnerMap) {
