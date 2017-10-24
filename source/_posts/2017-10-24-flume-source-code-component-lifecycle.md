@@ -5,7 +5,9 @@ tags:
   - java
   - source code
 categories: Big Data
+date: 2017-10-24 09:18:26
 ---
+
 
 [Apache Flume](https://flume.apache.org/) 是数据仓库体系中用于做实时 ETL 的工具。它提供了丰富的数据源和写入组件，这些组件在运行时都由 Flume 的生命周期管理机制进行监控和维护。本文将对这部分功能的源码进行解析。
 
