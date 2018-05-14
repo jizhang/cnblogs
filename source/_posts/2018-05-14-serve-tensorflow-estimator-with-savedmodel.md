@@ -8,7 +8,7 @@ categories: Programming
 date: 2018-05-14 13:23:14
 ---
 
-[TensorFlow][1] 是目前最为流行的机器学期框架之一，通过它我们可以便捷地构建机器学习模型。使用 TensorFlow 模型对外提供服务有若干种方式，本文将介绍如何使用 SavedModel 机制来编写模型预测接口。
+[TensorFlow][1] 是目前最为流行的机器学习框架之一，通过它我们可以便捷地构建机器学习模型。使用 TensorFlow 模型对外提供服务有若干种方式，本文将介绍如何使用 SavedModel 机制来编写模型预测接口。
 
 ![](/cnblogs/images/tf-logo.png)
 
@@ -51,7 +51,7 @@ Example(
 )
 ```
 
-接收函数会收到序列化后的 `Example` 对象，将其转化成一组 Tesnor 供模型消费。TensorFlow 提供了一些工具函数帮助我们完成这些转换。首先，我们将 `feature_columns` 数组转化成 `Feature` 字典，作为反序列化的规格标准，再用它生成接收函数：
+接收函数会收到序列化后的 `Example` 对象，将其转化成一组 Tensor 供模型消费。TensorFlow 提供了一些工具函数帮助我们完成这些转换。首先，我们将 `feature_columns` 数组转化成 `Feature` 字典，作为反序列化的规格标准，再用它生成接收函数：
 
 ```python
 # [
