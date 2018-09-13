@@ -1,5 +1,5 @@
 ---
-title: 是否应该使用 ESLint jsx-no-bind 规则？
+title: 是否需要使用 ESLint jsx-no-bind 规则？
 tags:
   - javascript
   - react
@@ -8,8 +8,7 @@ categories: Programming
 date: 2018-09-13 20:24:00
 ---
 
-
-When using [ESLint React plugin][1], you may find a rule called [`jsx-no-bind`][2]. It prevents you from using `.bind` or arrow function in a JSX prop. For instance, ESLint will complain about the arrow function in the `onClick` prop.
+在使用 [ESLint React][1] 插件时，有一条名为 [`jsx-no-bind`][2] 的检测规则，它会禁止我们在 JSX 属性中使用 `.bind` 方法和箭头函数。比如下列代码，ESLint 会提示 `onClick` 属性中的箭头函数不合法：
 
 ```javascript
 class ListArrow extends React.Component {
@@ -25,15 +24,15 @@ class ListArrow extends React.Component {
 }
 ```
 
-There're two reasons why this rule is introduced. First, a new function will be created on every `render` call, which may increase the frequency of garbage collection. Second, it will disable the pure rendering process, i.e. when you're using a `PureComponent`, or implement the `shouldComponentUpdate` method by yourself with identity comparison, a new function object in the props will cause unnecessary re-render of the component.
+这条规则的引入原因有二。首先，每次执行 `render` 方法时都会生成一个新的匿名函数对象，这样就会对垃圾回收器造成负担；其次，属性中的箭头函数会影响渲染过程：当你使用了 `PureComponent`，或者自己实现了 `shouldComponentUpdate` 方法，使用对象比较的方式来决定是否要重新渲染组件，那么组件属性中的箭头函数就会让该方法永远返回真值，引起不必要的重复渲染。
 
-But some people argue that these two reasons are not solid enough to enforce this rule on all projects, especially when the solutions will introduce more codes and decrease readability. In [Airbnb ESLint preset][3], the team only bans the usage of `.bind`, but allows arrow function in both props and refs. I did some googling, and was convinced that this rule is not quite necessary. Someone says it's premature optimization, and you should measure before you optimize. I agree with that. In the following sections, I will illustrate how arrow function would affect the pure component, what solutions we can use, and talk a little bit about React rendering internals.
+然而，反对的声音认为这两个原因还不足以要求我们在所有代码中应用该规则，特别是当需要引入更多代码、并牺牲一定可读性的情况下。在 [Airbnb ESLint][3] 预设规则集中，只禁止了 `.bind` 方法的使用，而允许在属性（props）或引用（refs）中使用箭头函数。对此我翻阅了文档，阅读了一些关于这个话题的博客，也认为这条规则有些过于严格。甚至还有博主称该规则是一种过早优化（premature optimization），我们需要先做基准测试，再着手修改代码。下文中，我将简要叙述箭头函数是如何影响渲染过程的，有哪些可行的解决方案，以及它为何不太重要。
 
 <!-- more -->
 
-## Different Types of React Component
+## 不同类型的 React 组件
 
-The regular way to create a React component is to extend the `React.Component` class and implement the `render` method. There is also a built-in `React.PureComponent`, which implements the life-cycle method `shouldComponentUpdate` for you. In regular component, this method will always return `true`, indicating that React should call `render` whenever the props or states change. `PureComponent`, on the other hand, does a shallow identity comparison for the props and states to see whether this component should be re-rendered. The following two components behave the same:
+通常我们会通过继承 `React.Component` 类并实现 `render` 方法来创建一个 React 组件。另一个内置的组件基类是 `React.PureComponent`，它的区别在于已经为我们实现了 `shouldComponentUpdate` 方法。在普通的 React 组件中，该方法默认返回 `true`，也就是说当属性（props）或状态（state）发生改变时，一定会重新进行渲染。而 `PureComponent` 实现的该方法中，会对新、旧属性和状态的键值做一个等值比较，只有当内容发生改变时才会重新渲染。下面的定义的这两个组件产生的效果是一致的：
 
 ```javascript
 class PureChild extends React.PureComponent {
@@ -44,7 +43,7 @@ class PureChild extends React.PureComponent {
   }
 }
 
-class RegularChild extends React.Component {
+class RegularChildB extends React.Component {
   shouldComponentUpdate(nextProps, nextStates) {
     return this.props.message !== nextProps.message
   }
@@ -57,7 +56,7 @@ class RegularChild extends React.Component {
 }
 ```
 
-When their parent component is re-rendering, they will both check the message content in props and decide whether they should render again. The comparison rule is quite simple in pure component, it iterates the props and states object, compare each others' members with `===` equality check. In JavaScript, only primitive types and the very same object will pass this test, for example:
+当它们的属性发生变化时，会检查 `message` 变量中的值是否和原来相等。属性和状态都是 `object` 类型，React 会遍历所有键值进行 `===` 等值比较。在 JavaScript 中，只有基础类型之间的比较、或同一个对象和自身比较时才能通过。
 
 ```javascript
 1 === 1
@@ -66,9 +65,9 @@ When their parent component is re-rendering, they will both check the message co
 (() => {}) !== (() => {})
 ```
 
-Clearly, arrow functions will fail the test and cause pure component to re-render every time its parent is re-rendered. On the other side, if you do not use pure component, or do props and states check on your own, enabling the `jsx-no-bind` rule is plain unnecessary.
+显然，箭头函数是无法通过这个等值检查的。如果父组件将箭头函数作为属性传入 `PureComponent`，那么每次渲染都会引发子组件的渲染。相反地，如果我们没有使用 `PureComponent`，或进行类似的等值比较，那么组件一定会进行更新，也就没有应用该规则的必要了。
 
-Recently another kind of component has become popular, the stateless functional component (SFC). These components' render results solely depend on their props, so they are like functions that take inputs and produce steady outputs. But under the hood, they are just regular components, i.e. they do not implement `shouldComponentUpdate`, and you can not implement by yourself either.
+另一个种较为流行的组件定义方式是“无状态函数式组件（SFC）”。这类组件好比一个数学函数，其渲染结果完全依赖于输入的属性值。不过，它本质上是一个普通的组件，并没有实现 `shouldComponentUpdate` 方法，且组件的定义方式也不允许我们自己来实现。
 
 ```javascript
 const StatelessChild = (props) => {
