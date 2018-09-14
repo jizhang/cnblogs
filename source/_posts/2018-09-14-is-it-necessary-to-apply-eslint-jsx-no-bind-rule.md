@@ -5,8 +5,9 @@ tags:
   - react
   - eslint
 categories: Programming
-date: 2018-09-13 20:24:00
+date: 2018-09-14 09:18:52
 ---
+
 
 在使用 [ESLint React][1] 插件时，有一条名为 [`jsx-no-bind`][2] 的检测规则，它会禁止我们在 JSX 属性中使用 `.bind` 方法和箭头函数。比如下列代码，ESLint 会提示 `onClick` 属性中的箭头函数不合法：
 
@@ -32,7 +33,7 @@ class ListArrow extends React.Component {
 
 ## 不同类型的 React 组件
 
-通常我们会通过继承 `React.Component` 类并实现 `render` 方法来创建一个 React 组件。另一个内置的组件基类是 `React.PureComponent`，它的区别在于已经为我们实现了 `shouldComponentUpdate` 方法。在普通的 React 组件中，该方法默认返回 `true`，也就是说当属性（props）或状态（state）发生改变时，一定会重新进行渲染。而 `PureComponent` 实现的该方法中，会对新、旧属性和状态的键值做一个等值比较，只有当内容发生改变时才会重新渲染。下面的定义的这两个组件产生的效果是一致的：
+通常我们会通过继承 `React.Component` 类并实现 `render` 方法来创建一个 React 组件。另一个内置的组件基类是 `React.PureComponent`，它的区别在于已经为我们实现了 `shouldComponentUpdate` 方法。在普通的 React 组件中，该方法默认返回 `true`，也就是说当属性（props）或状态（state）发生改变时，一定会重新进行渲染。而 `PureComponent` 实现的该方法中，会对新、旧属性和状态的键值做一个等值比较，只有当内容发生改变时才会重新渲染。下面定义的这两个组件产生的效果是一致的：
 
 ```javascript
 class PureChild extends React.PureComponent {
@@ -77,9 +78,9 @@ const StatelessChild = (props) => {
 }
 ```
 
-## How to Fix `jsx-no-bind` Error
+## 如何修复 `jsx-no-bind` 错误警告
 
-Arrow functions are usually used in event handlers. If we use normal functions or class methods, `this` keyword is not bound to the current instance, it is `undefined`. By using `.bind` or arrow function, we can access other class methods through `this`. To fix the `jsx-no-bind` error while still keeping the handler function bound, we can either bind it in constructor, or use the experimental class property syntax, which can be transformed by [Babel][6]. More information can be found in React [official document][5], and here is the [gist][7] of different solutions.
+箭头函数通常会用作事件处理。如果我们直接使用普通的函数或类方法，`this` 关键字将无法正确绑定到当前实例，它的值是 `undefined`。只有使用了 `.bind` 方法或箭头函数时，我们才能在函数体中通过 `this` 来访问到类的其他成员，只是这样就会触发 `jsx-no-bind` 报警。解决方法是在构造函数中对方法进行绑定，或者使用尚在草案阶段的类属性语法，并通过 [Babel][6] 进行转换。更多信息可以查阅 [React 官方文档][5]，以下用 [代码][7] 演示不同的做法。
 
 ```javascript
 export default class NoArgument extends React.Component {
@@ -87,7 +88,7 @@ export default class NoArgument extends React.Component {
     this.handleClickBoundA = this.handleClickUnbound.bind(this)
     this.handleClickBoundC = () => { this.setState() }
   }
-  handleClickUnbound() { /* "this" is undefined */ }
+  handleClickUnbound() { /* "this" 的值是未定义 */ }
   handleClickBoundB = () => { this.setState() }
   render() {
     return (
@@ -106,7 +107,7 @@ export default class NoArgument extends React.Component {
 }
 ```
 
-For handlers that require extra arguments, e.g. a list of clickable items, things will be a little tricky. There're two possible solutions, one is to create separate component for the item, and pass handler function and argument as props.
+如果事件处理需要用到额外的参数，比如渲染列表时捕捉每一项的点击事件，就不那么容易了。有两种解决方案，一是将列表项作为独立的组件拆分出来，通过组件属性来传递事件处理函数和它的参数，示例如下：
 
 ```javascript
 class Item extends React.PureComponent {
@@ -132,9 +133,9 @@ export default class ListSeparate extends React.Component {
 }
 ```
 
-This is a practice of separation of concerns, because now `List` only iterates the items, while `Item` takes care of rendering them. But this also adds a lot of codes, and make them hard to understand. We need to go through several handler functions to see what they actually do, while in the arrow function example, event handlers are co-located with the component, which is encouraged by React community.
+这种方式也称之为关注点分离（separation of concerns），因为 `List` 组件只需负责遍历列表项，而由 `Item` 组件来负责渲染。不过这样一来也会增加许多模板代码，我们需要跟踪多个属性值来确定事件处理过程，因此降低了代码可读性。若直接使用箭头函数，事件处理和组件渲染是在一处的，便于理解，也是 React 社区所推崇的方式。
 
-Another approach is to use DOM [`dataset`][8] property, i.e. store argument in HTML `data-*` attribute, and retrieve it with `event` argument in handler functions.
+另一种方式是使用 DOM [`dataset`][8] 属性，也就是将需要传递的参数暂存在 HTML 标签的 `data-*` 属性中， 然后通过 `event` 变量来读取。
 
 ```javascript
 export default class ListDataset extends React.Component {
@@ -151,25 +152,25 @@ export default class ListDataset extends React.Component {
 }
 ```
 
-## Virtual DOM and Reconciliation
+## 虚拟 DOM 与 React 协调
 
-Arrow function will cause pure components unnecessary re-rendering, actually this statement is partly true. React rendering process has several steps. First, call `render` function that returns a tree of React elements; compare them with the virtual DOM; and then, apply the difference to the real DOM. The latter process is also called [reconciliation][4]. So even if the `render` function is called multiple times, the resulting tree of elements may not change at all, so there is no DOM manipulation, and that usually costs more time than pure JavaScript code. For components that constantly change, making them pure just adds one more time of unnecessary comparison.
+上文说到，箭头函数会引发 `PureComponent` 不必要的渲染，这个结论只正确了一半。React 的渲染过程可以分为几个步骤：首先，调用 `render` 方法，返回一个 React 元素的树形结构；将该结构与内存中的虚拟 DOM 树进行对比，将差异部分应用到浏览器的真实 DOM 树中。这个过程在 React 中称为协调（[reconciliation][4]）。因此，即便 `render` 方法被调用了多次，如果其返回的 React 元素树都是相同的，那么也不会触发真实 DOM 渲染，而这个过程通常会比纯 JavaScript 要来得耗时。这样看来，如果一个组件的确需要频繁变动，那么继承了 `PureComponent` 反而会增加一次比对的消耗，得不偿失。
 
-![shouldComponentUpdate](/cnblogs/images/jsx-no-bind/should-component-update.png)
+![shouldComponentUpdate 生命周期方法](/cnblogs/images/jsx-no-bind/should-component-update.png)
 
-[来源][9]
+[图片来源][9]
 
-Besides, change of event handlers will probably not cause re-rendering of the real DOM, because React only listens event on the `document` level. When the `onClick` event is triggered on the `li` element, it will bubble up to the top level and get processed by React event management system.
+此外，在事件绑定属性中使用箭头函数，一般也不会触发真实 DOM 的渲染，原因是 React 的事件监听器是绑定在顶层的 `document` 元素上的，当 `li` 上触发了 `onClick` 事件后，该事件会向上冒泡（bubble up）至顶层元素，由 React 事件管理系统接收和处理。
 
-![Top-level Delegation](/cnblogs/images/jsx-no-bind/top-level-delegation.jpg)
+![顶层事件委托](/cnblogs/images/jsx-no-bind/top-level-delegation.jpg)
 
-[来源][10]
+[图片来源][10]
 
-## Conclusion
+## 结论
 
-To fix `jsx-no-bind` we need to trade off readability, and yet the performance may not improve as much as we thought. So instead of guessing what may cause performance problem, why not program in a natural way at first, and when there occurs some noticeable performance issues, take measures, and fix them with appropriate techniques.
+可以看到，在修复 `jsx-no-bind` 的过程中，我们需要牺牲一定的代码可读性，而获得的性能收益也许是微不足道甚至是相反的。与其猜测箭头函数会引发性能问题，不如先用最自然的方式来编写代码，当遇到真正的性能瓶颈时加以测度，最终找出合适的技术方案。
 
-## References
+## 参考资料
 
 * https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md
 * https://cdb.reacttraining.com/react-inline-functions-and-performance-bdff784f5578
