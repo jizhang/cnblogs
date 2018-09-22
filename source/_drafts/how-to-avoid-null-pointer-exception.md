@@ -54,9 +54,9 @@ public void testLombokGenerated(Object arg) {
 
 ## 编程规范
 
-There are some coding conventions we can use to avoid `NullPointerException`.
+通过遵守某些编程规范，也可以从一定程度上减少空指针异常的发生。
 
-* Use methods that already guard against `null` values, such as `String#equals`, `String#valueOf`, and third party libraries that help us check whether string or collection is empty.
+* 使用那些已经对 `null` 值做过判断的方法，如 `String#equals`、`String#valueOf`、以及三方库中用来判断字符串和集合是否为空的函数：
 
 ```java
 if (str != null && str.equals("text")) {}
@@ -74,7 +74,7 @@ Strings.isNullOrEmpty(str);
 CollectionUtils.isEmpty(col);
 ```
 
-* If a method accepts nullable value, define two methods with different signatures, so as to make every parameter mandatory.
+* 如果函数的某个参数可以接收 `null` 值，考虑改写成两个函数，使用不同的函数签名，这样就可以强制要求每个参数都不为空了：
 
 ```java
 public void methodA(Object arg1) {
@@ -86,41 +86,41 @@ public void methodB(Object arg1, Object[] arg2) {
 }
 ```
 
-* For return values, if the type is `Collection`, return an empty collection instead of null; if it's a single object, consider throwing an exception. This approach is also suggested by *Effective Java*. Good examples come from Spring's JdbcTemplate:
+* 如果函数的返回值是集合类型，当结果为空时，不要返回 `null` 值，而是返回一个空的集合；如果返回值类型是对象，则可以选择抛出异常。Spring JdbcTemplate 正是使用了这种处理方式：
 
 ```java
-// return new ArrayList<>() when result set is empty
-jdbcTemplate.queryForList("SELECT 1");
+// 当查询结果为空时，返回 new ArrayList<>()
+jdbcTemplate.queryForList("SELECT * FROM person");
 
-// throws EmptyResultDataAccessException when record not found
-jdbcTemplate.queryForObject("SELECT 1", Integer.class);
+// 若找不到该条记录，则抛出 EmptyResultDataAccessException
+jdbcTemplate.queryForObject("SELECT age FROM person WHERE id = 1", Integer.class);
 
-// works for generics
+// 支持泛型集合
 public <T> List<T> testReturnCollection() {
   return Collections.emptyList();
 }
 ```
 
-## 静态分析
+## 静态代码分析
 
-Java has some static code analysis tools, like Eclipse IDE, SpotBugs, Checker Framework, etc. They can find out program bugs during compilation process. It would be nice to catch `NullPointerException` as early as possible, and this can be done with annotations like `@Nullable` and `@Nonnull`.
+Java 语言有许多静态代码分析工具，如 Eclipse IDE、SpotBugs、Checker Framework 等，它们可以帮助程序员检测出编译期的错误。结合 `@Nullable` 和 `@Nonnull` 等注解，我们就可以在程序运行之前发现可能抛出空指针异常的代码。
 
-However, nullness check annotations have not been standardized yet. Though there was a [JSR 305][4] proposed back to Sep. 2006, it has been dormant ever since. A lot of third party libraries provide such annotations, and they are supported by different tools. Some popular candidates are:
+但是，空值检测注解还没有得到标准化。虽然 2006 年 9 月社区提出了 [JSR 305][4] 规范，但它长期处于搁置状态。很多第三方库提供了类似的注解，且得到了不同工具的支持，其中使用较多的有：
 
-* `javax.annotation.Nonnull`, proposed by JSR 305, and its reference implementation is `com.google.code.findbugs.jsr305`.
-* `org.eclipse.jdt.annotation.NonNull`, used by Eclipse IDE to do static nullness check.
-* `edu.umd.cs.findbugs.annotations.NonNull`, used by SpotBugs, it depends on `jsr305`.
-* `org.springframework.lang.NonNull`, provided by Spring Framework.
-* `org.checkerframework.checker.nullness.qual.NonNull`, used by Checker Framework.
-* `android.support.annotation.NonNull`, used by Android Development Toolkit.
+* `javax.annotation.Nonnull`：由 JSR 305 提出，其参考实现为 `com.google.code.findbugs.jsr305`；
+* `org.eclipse.jdt.annotation.NonNull`：Eclipse IDE 原生支持的空值检测注解；
+* `edu.umd.cs.findbugs.annotations.NonNull`：SpotBugs 使用的注解，基于 `findbugs.jsr305`；
+* `org.springframework.lang.NonNull`：Spring Framework 5.0 开始提供；
+* `org.checkerframework.checker.nullness.qual.NonNull`：Checker Framework 使用；
+* `android.support.annotation.NonNull`：集成在安卓开发工具中；
 
-I suggest using a cross IDE solution like SpotBugs or Checker Framework, which also plays nicely with Maven.
+我建议使用一种跨 IDE 的解决方案，如 SpotBugs 或 Checker Framework，它们都能和 Maven 结合得很好。
 
-### `@NonNull` and `@CheckForNull` with SpotBugs
+### SpotBugs 与 `@NonNull`、`@CheckForNull`
 
-SpotBugs is the successor of FindBugs. We can use `@NonNull` and `@CheckForNull` on method arguments or return values, so as to apply nullness check. Notably, SpotBugs does not respect `@Nullable`, which is only useful when overriding `@ParametersAreNullableByDefault`. Use `@CheckForNull` instead.
+SpotBugs 是 FindBugs 的后继者。通过在方法的参数和返回值上添加 `@NonNull` 和 `@CheckForNull` 注解，SpotBugs 可以帮助我们进行编译期的空值检测。需要注意的是，SpotBugs 不支持 `@Nullable` 注解，必须用 `@CheckForNull` 代替。如官方文档中所说，仅当需要覆盖 `@ParametersAreNonnullByDefault` 时才会用到 `@Nullable`。
 
-To integrate SpotBugs with Maven and Eclipse, one can refer to its [official document][5]. Make sure you add the `spotbugs-annotations` package in Maven dependencies, which includes the nullness check annotations.
+[官方文档][5] 中说明了如何将 SpotBugs 应用到 Maven 和 Eclipse 中去。我们还需要将 `spotbugs-annotations` 加入到项目依赖中，以便使用对应的注解。
 
 ```xml
 <dependency>
@@ -130,12 +130,12 @@ To integrate SpotBugs with Maven and Eclipse, one can refer to its [official doc
 </dependency>
 ```
 
-Here are the examples of different scenarios.
+以下是对不同使用场景的说明：
 
 ```java
 @NonNull
 private Object returnNonNull() {
-  // ERROR: returnNonNull() may return null, but is declared @Nonnull
+  // 错误：returnNonNull() 可能返回空值，但其已声明为 @Nonnull
   return null;
 }
 
@@ -146,7 +146,7 @@ private Object returnNullable() {
 
 public void testReturnNullable() {
   Object obj = returnNullable();
-  // ERROR: Possible null pointer dereference due to return value of called method
+  // 错误：方法的返回值可能为空
   System.out.println(obj.toString());
 }
 
@@ -155,23 +155,23 @@ private void argumentNonNull(@NonNull Object arg) {
 }
 
 public void testArgumentNonNull() {
-  // ERROR: Null passed for non-null parameter of argumentNonNull(Object)
+  // 错误：不能将 null 传递给非空参数
   argumentNonNull(null);
 }
 
 public void testNullableArgument(@CheckForNull Object arg) {
-  // ERROR: arg must be non-null but is marked as nullable
+  // 错误：参数可能为空
   System.out.println(arg.toString());
 }
 ```
 
-For Eclipse users, it is also possible to use its built-in nullness check along with SpotBugs. By default, Eclipse uses annotations under its own package, i.e. `org.eclipse.jdt.annotation.Nullable`, but we can easily add more annotations.
+对于 Eclipse 用户，还可以使用 IDE 内置的空值检测工具，只需将默认的注解 `org.eclipse.jdt.annotation.Nullable` 替换为 SpotBugs 的注解即可：
 
 ![Eclipse null analysis](/cnblogs/images/java-npe/eclipse.png)
 
-### `@NonNull` and `@Nullable` with Checker Framework
+### Checker Framework 与 `@NonNull`、`@Nullable`
 
-Checker Framework works as a plugin to the `javac` compiler, to provide type checks, detect and prevent various errors. Follow the [official document][6], integrate Checker Framework with `maven-compiler-plugin`, and it will start to work when executing `mvn compile`. The Nullness Checker supports all kinds of annotations, from JSR 305 to Eclipse built-ins, even `lombok.NonNull`.
+Checker Framework 能够作为 `javac` 编译器的插件运行，对代码中的数据类型进行检测，预防各类问题。我们可以参照 [官方文档][6]，将 Checker Framework 与 `maven-compiler-plugin` 结合，之后每次执行 `mvn compile` 时就会进行检查。Checker Framework 的空值检测程序支持几乎所有的注解，包括 JSR 305、Eclipse、甚至 `lombok.NonNull`。
 
 ```java
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -183,17 +183,16 @@ private Object returnNullable() {
 
 public void testReturnNullable() {
   Object obj = returnNullable();
-  // ERROR: dereference of possibly-null reference obj
+  // 错误：obj 可能为空
   System.out.println(obj.toString());
 }
 ```
 
-By default, Checker Framework applies `@NonNull` to all method arguments and return values. The following snippet, without any annotations, cannot pass compilation, either.
+Checker Framework 默认会将 `@NonNull` 应用到所有的函数参数和返回值上，因此，即使不添加这个注解，以下程序也是无法编译通过的：
 
 ```java
 private Object returnNonNull() {
-  // ERROR: incompatible types in return.
-  // found: null, required: @Initialized @NonNull Object.
+  // 错误：方法声明为 @NonNull，但返回的是 null。
   return null;
 }
 
@@ -202,29 +201,28 @@ private void argumentNonNull(Object arg) {
 }
 
 public void testArgumentNonNull() {
-  // ERROR: incompatible types in argument.
-  // found: null, required: @Initialized @NonNull Object
+  // 错误：参数声明为 @NonNull，但传入的是 null。
   argumentNonNull(null);
 }
 ```
 
-Checker Framework is especially useful for Spring Framework users, because from version 5.x, Spring provides built-in annotations for nullness check, and they are all over the framework code itself, mainly for Kotlin users, but we Java programmers can benefit from them, too. Take `StringUtils` class for instance, since the whole package is declared `@NonNull`, those methods with nullable argument and return values are explicitly annotated with `@Nullable`, so the following code will cause compilation failure.
+Checker Framework 对使用 Spring Framework 5.0 以上的用户非常有用，因为 Spring 提供了内置的空值检测注解，且能够被 Checker Framework 支持。一方面我们不需要引入额外的 Jar 包，更重要的是 Spring Framework 代码本身就添加了这些注解，这样我们在调用它的 API 时就能有效地处理空值了。举例来说，`StringUtils` 类里可以传入空值的函数、以及会返回空值的函数都添加了 `@Nullable` 注解，而未添加的方法则集成了整个框架的 `@NonNull` 注解，因此，下列代码中的空指针异常就可以被 Checker Framework 检测到：
 
 ```java
-// Defined in spring-core
+// 这是 spring-core 中定义的类和方法
 public abstract class StringUtils {
-  // str inherits @NonNull from top-level package
+  // str 参数集成了全局的 @NonNull 注解
   public static String capitalize(String str) {}
 
   @Nullable
   public static String getFilename(@Nullable String path) {}
 }
 
-// ERROR: incompatible types in argument. found null, required @NonNull
+// 错误：参数声明为 @NonNull，但传入的是 null。
 StringUtils.capitalize(null);
 
 String filename = StringUtils.getFilename("/path/to/file");
-// ERROR: dereference of possibly-null reference filename
+// 错误：filename 可能为空。
 System.out.println(filename.length());
 ```
 
