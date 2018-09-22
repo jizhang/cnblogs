@@ -5,7 +5,9 @@ tags:
   - spring
   - eclipse
 categories: Programming
+date: 2018-09-22 20:27:36
 ---
+
 
 Java 中任何对象都有可能为空，当我们调用空对象的方法时就会抛出 `NullPointerException` 空指针异常，这是一种非常常见的错误类型。我们可以使用若干种方法来避免产生这类异常，使得我们的代码更为健壮。本文将列举这些解决方案，包括传统的空值检测、编程规范、以及使用现代 Java 语言引入的各类工具来作为辅助。
 
@@ -206,12 +208,12 @@ public void testArgumentNonNull() {
 }
 ```
 
-Checker Framework 对使用 Spring Framework 5.0 以上的用户非常有用，因为 Spring 提供了内置的空值检测注解，且能够被 Checker Framework 支持。一方面我们不需要引入额外的 Jar 包，更重要的是 Spring Framework 代码本身就添加了这些注解，这样我们在调用它的 API 时就能有效地处理空值了。举例来说，`StringUtils` 类里可以传入空值的函数、以及会返回空值的函数都添加了 `@Nullable` 注解，而未添加的方法则集成了整个框架的 `@NonNull` 注解，因此，下列代码中的空指针异常就可以被 Checker Framework 检测到：
+Checker Framework 对使用 Spring Framework 5.0 以上的用户非常有用，因为 Spring 提供了内置的空值检测注解，且能够被 Checker Framework 支持。一方面我们无需再引入额外的 Jar 包，更重要的是 Spring Framework 代码本身就使用了这些注解，这样我们在调用它的 API 时就能有效地处理空值了。举例来说，`StringUtils` 类里可以传入空值的函数、以及会返回空值的函数都添加了 `@Nullable` 注解，而未添加的方法则继承了整个框架的 `@NonNull` 注解，因此，下列代码中的空指针异常就可以被 Checker Framework 检测到了：
 
 ```java
 // 这是 spring-core 中定义的类和方法
 public abstract class StringUtils {
-  // str 参数集成了全局的 @NonNull 注解
+  // str 参数继承了全局的 @NonNull 注解
   public static String capitalize(String str) {}
 
   @Nullable
@@ -228,27 +230,28 @@ System.out.println(filename.length());
 
 ## `Optional` 类型
 
-Java 8 introduces the `Optional<T>` class that can be used to wrap a nullable return value, instead of returning null or throwing an exception. On the upside, a method that returns `Optional` explicitly states it may return an empty value, so the invoker must check the presence of the value, and no NPE will be thrown. However, it does introduce more codes, and adds some overhead of object creation. So use it with caution.
+Java 8 引入了 `Optional<T>` 类型，我们可以用它来对函数的返回值进行包装。这种方式的优点是可以明确定义该方法是有可能返回空值的，因此调用方必须做好相应处理，这样也就不会引发空指针异常。但是，也不可避免地需要编写更多代码，而且会产生很多垃圾对象，增加 GC 的压力，因此在使用时需要酌情考虑。
+
 
 ```java
 Optional<String> opt;
 
-// create
+// 创建
 opt = Optional.empty();
 opt = Optional.of("text");
 opt = Optional.ofNullable(null);
 
-// test & get
+// 判断并读取
 if (opt.isPresent()) {
   opt.get();
 }
 
-// fall back
+// 默认值
 opt.orElse("default");
 opt.orElseGet(() -> "default");
 opt.orElseThrow(() -> new NullPointerException());
 
-// operate
+// 相关操作
 opt.ifPresent(value -> {
   System.out.println(value);
 });
@@ -260,7 +263,7 @@ opt.flatMap(value -> {
 });
 ```
 
-Chaining of methods is a common cause of NPE, but if you have a series of methods that return `Optional`, you can chain them with `flatMap`, NPE-freely.
+方法的链式调用很容易引发空指针异常，但如果返回值都用 `Optional` 包装起来，就可以用 `flatMap` 方法来实现安全的链式调用了：
 
 ```java
 String zipCode = getUser()
@@ -269,7 +272,7 @@ String zipCode = getUser()
     .orElse("");
 ```
 
-Java 8 [Stream API][7] also uses optionals to return nullable values. For instance:
+Java 8 [Stream API][7] 同样使用了 `Optional` 作为返回类型：
 
 ```java
 stringList.stream().findFirst().orElse("default");
@@ -278,18 +281,18 @@ stringList.stream()
     .ifPresent(System.out::println);
 ```
 
-Lastly, there are some special optional classes for primitive types, such as `OptionalInt`, `OptionalDouble`, etc. Use them whenever you find applicable.
+此外，Java 8 还针对基础类型提供了单独的 `Optional` 类，如 `OptionalInt`、`OptionalDouble` 等，在性能要求比较高的场景下很适用。
 
-## 其它 JVM 中的空指针异常
+## 其它 JVM 语言中的空指针异常
 
-Scala provides an [`Option`][8] class similar to Java 8 `Optional`. It has two subclasses, `Some` represents an existing value, and `None` for empty result.
+Scala 语言中的 [`Option`][8] 类可以对标 Java 8 的 `Optional`。它有两个子类型，`Some` 表示有值，`None` 表示空。
 
 ```scala
 val opt: Option[String] = Some("text")
 opt.getOrElse("default")
 ```
 
-Instead of invoking `Option#isEmpty`, we can use Scala's pattern match:
+除了使用 `Option#isEmpty` 判断，还可以使用 Scala 的模式匹配：
 
 ```scala
 opt match {
@@ -298,7 +301,7 @@ opt match {
 }
 ```
 
-Scala's collection operations are very powerful, and `Option` can be treated as collection, so we can apply `filter`, `map`, or for-comprehension to it.
+Scala 的集合处理函数库非常强大，`Option` 则可直接作为集合进行操作，如 `filer`、`map`、以及列表解析（for-comprehension）：
 
 ```scala
 opt.map(_.trim).filter(_.length > 0).map(_.toUpperCase).getOrElse("DEFAULT")
@@ -310,26 +313,25 @@ val upper = for {
 upper.getOrElse("DEFAULT")
 ```
 
-Kotlin takes another approach. It distinguishes [nullable types and non-null types][9], and programmers are forced to check nullness before using nullable variables.
+Kotlin 使用了另一种方式，用户在定义变量时就需要明确区分 [可空和不可空类型][9]。当可空类型被使用时，就必须进行空值检测。
 
 ```kotlin
 var a: String = "text"
-a = null // Error: Null can not be a value of a non-null type String
+a = null // 错误：无法将 null 赋值给非空 String 类型。
 
 val b: String? = "text"
-// Error: Only safe (?.) or non-null asserted (!!.) calls are allowed
-// on a nullable receiver of type String?
+// 错误：操作可空类型时必须使用安全操作符（?.）或强制忽略（!!.）。
 println(b.length)
 
-val l: Int? = b?.length // safe call
-b!!.length // may throw NPE
+val l: Int? = b?.length // 安全操作
+b!!.length // 强制忽略，可能引发空值异常
 ```
 
-When calling Java methods from Kotlin, the compiler does not ensure null-safety, because every object from Java is nullable. But we can use annotations to achieve strict nullness check. Kotlin supports a wide range of [annotations][9], including those used in Spring Framework, which makes Spring API null-safe in Kotlin.
+Kotlin 的特性之一是与 Java 的可互操作性，但 Kotlin 编译器无法知晓 Java 类型是否为空，这就需要在 Java 代码中使用注解了，而 Kotlin 支持的 [注解][9] 也非常广泛。Spring Framework 5.0 起原生支持 Kotlin，其空值检测也是通过注解进行的，使得 Kotlin 可以安全地调用 Spring Framework 的所有 API。
 
 ## 结论
 
-In all these solutions, I prefer the annotation approach, since it's effective while less invasive. All public API methods should be annotated `@Nullable` or `@NonNull` so that the caller will be forced to do nullness check, making our program NPE free.
+在以上这些方案中，我比较推荐使用注解来预防空指针异常，因为这种方式十分有效，对代码的侵入性也较小。所有的公共 API 都应该使用 `@Nullable` 和 `@NonNull` 进行注解，这样就能强制调用方对空指针异常进行预防，让我们的程序更为健壮。
 
 ## 参考资料
 
