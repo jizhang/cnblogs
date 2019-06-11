@@ -1,0 +1,43 @@
+' https://planttext.com/
+
+@startuml
+
+participant User
+
+User -> Driver ++ : run()
+
+Driver -> Driver ++ : compile()
+Driver -> DbTxnManager ++ : openTxn()
+DbTxnManager -> HiveMetaStoreClient ++ : openTxn()
+return txnId
+return txnId
+deactivate Driver
+
+Driver -> DbTxnManager ++ : acquireLocks()
+DbTxnManager -> DbLockManager ++ : lock()
+DbLockManager -> HiveMetaStoreClient ++ : lock()
+return LockResponse
+return LockState
+deactivate DbTxnManager
+
+Driver -> Driver ++ : recordValidWriteIds()
+Driver -> DbTxnManager ++ : getValidWriteIds()
+DbTxnManager -> HiveMetaStoreClient ++ : getValidWriteIds()
+return ValidWriteIdList
+return ValidTxnWriteIdList
+deactivate Driver
+
+Driver -> TaskRunner ++ : start()
+Driver -> TaskRunner : getTaskResult()
+return TaskResult
+
+Driver -> Driver ++ : releaseLocksAnd\nCommitOrRollback()
+Driver -> DbTxnManager ++ : commitTxn()
+DbTxnManager -> HiveMetaStoreClient ++ : commitTxn()
+deactivate HiveMetaStoreClient
+deactivate DbTxnManager
+deactivate Driver
+
+return Response
+
+@enduml
