@@ -383,9 +383,9 @@ Rescaled job 755877434b676ce9dae5cfb533ed7f33. Its new parallelism is 2.
 
 ## Flink 将原生支持 Kubernetes
 
-Flink 有着非常活跃的开源社区，他们不断改进自身设计（[FLIP-6][10]），以适应现今的云原生环境。他们也注意到了 Kubernetes 的蓬勃发展，对 K8s 集群的原生支持也在开发中。我们知道，Flink 可以直接运行在 YARN 或 Mesos 资源管理框架上。以 YARN 为例，Flink 首先启动一个 ApplicationMaster，作为 JobManager，分析提交的脚本需要多少资源，并主动向 YARN ResourceManager 申请，开启对应的 TaskManager。当脚本的并行度改变后，Flink 会自动新增或释放 TaskManager 容器，达到扩容缩容的目的。这种主动管理资源的模式，社区正在开发针对 Kubernetes 的版本（[FLIP-9953][19]），今后我们便可以使用简单的命令来将 Flink 部署到 K8s 上了。
+Flink 有着非常活跃的开源社区，他们不断改进自身设计（[FLIP-6][10]），以适应现今的云原生环境。他们也注意到了 Kubernetes 的蓬勃发展，对 K8s 集群的原生支持也在开发中。我们知道，Flink 可以直接运行在 YARN 或 Mesos 资源管理框架上。以 YARN 为例，Flink 首先启动一个 ApplicationMaster，作为 JobManager，分析提交的脚本需要多少资源，并主动向 YARN ResourceManager 申请，开启对应的 TaskManager。当脚本的并行度改变后，Flink 会自动新增或释放 TaskManager 容器，达到扩容缩容的目的。这种主动管理资源的模式，社区正在开发针对 Kubernetes 的版本（[FLINK-9953][19]），今后我们便可以使用简单的命令来将 Flink 部署到 K8s 上了。
 
-此外，另一种资源管理模式也在开发中，社区称为响应式容器管理（[FLIP-10407 Reactive container mode][20]）。简单来说，当 JobManager 发现手中有多余的 TaskManager 时，会自动将运行中的脚本扩容到相应的并发度。以上文中的操作为例，我们只需使用 `kubectl scale` 命令修改 TaskManager Deployment 的 `replicas` 个数，就能够达到扩容和缩容的目的，无需再执行 `flink modify`。相信不久的将来我们就可以享受到这些便利的功能。
+此外，另一种资源管理模式也在开发中，社区称为响应式容器管理（[FLINK-10407 Reactive container mode][20]）。简单来说，当 JobManager 发现手中有多余的 TaskManager 时，会自动将运行中的脚本扩容到相应的并发度。以上文中的操作为例，我们只需使用 `kubectl scale` 命令修改 TaskManager Deployment 的 `replicas` 个数，就能够达到扩容和缩容的目的，无需再执行 `flink modify`。相信不久的将来我们就可以享受到这些便利的功能。
 
 ## 参考资料
 
