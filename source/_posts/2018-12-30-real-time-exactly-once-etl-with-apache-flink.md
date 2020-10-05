@@ -228,7 +228,7 @@ Apache Flink 构建在实时处理之上，从设计之初就充分考虑了中�
 
 [1]: https://ci.apache.org/projects/flink/flink-docs-release-1.7/dev/connectors/kafka.html
 [2]: https://kafka.apache.org/quickstart
-[3]: https://github.com/jizhang/flink-sandbox/blob/master/src/main/java/com/shzhangji/flinksandbox/kafka/EventTimeBucketAssigner.java
+[3]: https://github.com/jizhang/flink-sandbox/blob/blog-etl/src/main/java/com/shzhangji/flinksandbox/kafka/EventTimeBucketAssigner.java
 [4]: https://ci.apache.org/projects/flink/flink-docs-release-1.7/ops/deployment/cluster_setup.html
 [5]: https://ci.apache.org/projects/flink/flink-docs-release-1.7/dev/connectors/guarantees.html
 [6]: https://ci.apache.org/projects/flink/flink-docs-release-1.7/internals/stream_checkpointing.html
