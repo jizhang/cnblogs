@@ -16,7 +16,7 @@ date: 2017-06-18 18:59:53
 
 这是 Crossfilter 官方网站提供的示例，基于 [ASA Data Expo](http://stat-computing.org/dataexpo/2009/) 数据集的航班延误统计。下面我们将介绍如何用 dc.js 来实现这份交互式报表。项目源码可以在 [JSFiddle](https://jsfiddle.net/zjerryj/gjao9sws/) 中浏览，演示的数据量减少到 1000 条。
 
-![](/cnblogs/images/airline-ontime-performance.png)
+![](/images/airline-ontime-performance.png)
 
 <!-- more -->
 

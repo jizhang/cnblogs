@@ -13,7 +13,7 @@ date: 2017-09-13 12:39:03
 
 [Apache Beam][1] 是一种大数据处理标准，由谷歌于 2016 年创建。它提供了一套统一的 DSL 用以处理离线和实时数据，并能在目前主流的大数据处理平台上使用，包括 Spark、Flink、以及谷歌自身的商业套件 Dataflow。Beam 的数据模型基于过去的几项研究成果：[FlumeJava][2]、[Millwheel][3]，适用场景包括 ETL、统计分析、实时计算等。目前，Beam 提供了两种语言的 SDK：Java、Python。本文将讲述如何使用 Python 编写 Beam 应用程序。
 
-![Apache Beam Pipeline](/cnblogs/images/beam/arch.jpg)
+![Apache Beam Pipeline](/images/beam/arch.jpg)
 
 ## 安装 Apache Beam
 
@@ -242,7 +242,7 @@ windowed_counts =  windowed_counts | beam.ParDo(PrintWindowFn())
 
 上文中提到，Apache Beam 是一个数据处理标准，只提供了 SDK 和 API，因而必须使用 Spark、Flink 这样的计算引擎来运行它。下表列出了当前支持 Beam Model 的引擎，以及他们的兼容程度：
 
-![Beam 运行时能力矩阵](/cnblogs/images/beam/matrix.png)
+![Beam 运行时能力矩阵](/images/beam/matrix.png)
 
 [图片来源](https://beam.apache.org/documentation/runners/capability-matrix/)
 

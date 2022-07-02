@@ -10,7 +10,7 @@ date: 2018-05-14 13:23:14
 
 [TensorFlow][1] 是目前最为流行的机器学习框架之一，通过它我们可以便捷地构建机器学习模型。使用 TensorFlow 模型对外提供服务有若干种方式，本文将介绍如何使用 SavedModel 机制来编写模型预测接口。
 
-![](/cnblogs/images/tf-logo.png)
+![](/images/tf-logo.png)
 
 ## 鸢尾花深层神经网络分类器
 

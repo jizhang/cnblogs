@@ -11,7 +11,7 @@ date: 2017-07-16 15:55:05
 
 在生产环境运维工作中，查看线上服务器日志是一项常规工作。如果这项工作可以在浏览器中进行，而无需登录服务器执行 `tail -f` 命令，就太方便了。我们可以使用 WebSocket 技术轻松实现这一目标。在本文中，我将带各位一起使用 Python 编写一个日志查看工具。
 
-![基于 WebSocket 的日志查看器](/cnblogs/images/logviewer-websocket.png)
+![基于 WebSocket 的日志查看器](/images/logviewer-websocket.png)
 
 ## WebSocket 简介
 

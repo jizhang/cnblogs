@@ -15,7 +15,7 @@ Apache Flume 数据流程的最后一部分是 Sink，它会将上游抽取并�
 
 [在上一篇文章中][1], 我们了解到 Flume 组件都会实现 `LifecycleAware` 接口，并由 `LifecycleSupervisor` 实例管理和监控。不过，Sink 组件并不直接由它管理，而且被包装在了 `SinkRunner` 和 `SinkProcessor` 这两个类中。Flume 支持三种 [Sink 处理器][2]，该处理器会将 Channel 和 Sink 以不同的方式连接起来。这里我们只讨论 `DefaultSinkProcessor` 的情况，即一个 Channel 只会连接一个 Sink。同时，我们也将略过对 Sink 分组的讨论。
 
-![Sink Component LifeCycle](/cnblogs/images/flume/sink-component-lifecycle.png)
+![Sink Component LifeCycle](/images/flume/sink-component-lifecycle.png)
 
 <!-- more -->
 
@@ -23,7 +23,7 @@ Apache Flume 数据流程的最后一部分是 Sink，它会将上游抽取并�
 
 HDFS Sink 模块的源码在 `flume-hdfs-sink` 子目录中，主要由以下几个类组成：
 
-![HDFS Sink Classes](/cnblogs/images/flume/hdfs-sink-classes.png)
+![HDFS Sink Classes](/images/flume/hdfs-sink-classes.png)
 
 `HDFSEventSink` 类实现了生命周期的各个方法，包括 `configure`、`start`、`process`、`stop` 等。它启动后会维护一组 `BucketWriter` 实例，每个实例对应一个 HDFS 输出文件路径，上游的消息会传递给它，并写入 HDFS。通过不同的 `HDFSWriter` 实现，它可以将数据写入文本文件、压缩文件、或是 `SequenceFile`。
 
@@ -58,7 +58,7 @@ public void start() {
 
 `process` 方法包含了 HDFS Sink 的主要逻辑，也就是从上游的 Channel 中获取数据，并写入指定的 HDFS 文件，流程图如下：
 
-![Process Method Flow Chart](/cnblogs/images/flume/process-method-flow-chart.png)
+![Process Method Flow Chart](/images/flume/process-method-flow-chart.png)
 
 ### Channel 事务
 

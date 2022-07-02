@@ -21,7 +21,7 @@ df = pd.read_csv('data/pew.csv')
 df.head(10)
 ```
 
-![宗教信仰与收入 - Pew 论坛](/cnblogs/images/tidy-data/pew.png)
+![宗教信仰与收入 - Pew 论坛](/images/tidy-data/pew.png)
 
 表中的列“<$10k”、“$10-20k”其实是“收入”变量的具体值。*变量* 是指某一特性的观测值，如身高、体重，本例中则是收入、宗教信仰。表中的数值数据构成了另一个变量——人数。要做到 *每个变量是一列* ，我们需要进行以下变换：
 
@@ -34,7 +34,7 @@ df = df.reset_index()
 df.head(10)
 ```
 
-![宗教信仰与收入 - 整洁版](/cnblogs/images/tidy-data/pew-tidy.png)
+![宗教信仰与收入 - 整洁版](/images/tidy-data/pew-tidy.png)
 
 <!-- more -->
 
@@ -59,7 +59,7 @@ df.head(10)
 
 这段代码会输出相同的结果，下面的示例中我们都将使用 `melt()` 方法。我们再来看另外一个案例：
 
-![Billboard 2000](/cnblogs/images/tidy-data/billboard.png)
+![Billboard 2000](/images/tidy-data/billboard.png)
 
 在这个数据集中，每周的排名都被记录到了不同的数据列中。如果我们想要回答“Dancing Queen 这首歌在 2000年7月15日 的排名如何”，就需要结合 `date.entered` 字段做一些运算才行。下面我们来对这份数据进行整理：
 
@@ -75,7 +75,7 @@ df.to_csv('data/billboard-intermediate.csv', index=False)
 df.head(10)
 ```
 
-![Billboard 2000 - 中间版](/cnblogs/images/tidy-data/billboard-intermediate.png)
+![Billboard 2000 - 中间版](/images/tidy-data/billboard-intermediate.png)
 
 上述代码中，我们还将 `date.entered` 转换成了每一周的具体日期，`week` 字段也作为单独的数据列进行存储。但是，我们会在表中看到很多重复的信息，如歌手、曲名等，我们将在第四节解决这个问题。
 
@@ -83,7 +83,7 @@ df.head(10)
 
 人们之所以会将变量值作为列名，一方面是这样的表示方法更为紧凑、可以在一页中显示更多信息，还有一点是这种格式便于做交叉验证等数据分析工作。下面的数据集更是将性别和年龄这两个变量都放入了列名中：
 
-![结核病 (TB)](/cnblogs/images/tidy-data/tb.png)
+![结核病 (TB)](/images/tidy-data/tb.png)
 
 `m` 表示男性（Male），`f` 表示女性（Female），`0-14`、`15-24` 则表示年龄段。进行数据整理时，我们先用 Pandas 的字符串处理功能截取 `sex` 字段，再对剩余表示年龄段的子串做映射处理。
 
@@ -108,13 +108,13 @@ df.to_csv('data/tb-tidy.csv', index=False)
 df.head(10)
 ```
 
-![结核病 (TB) - 整洁版](/cnblogs/images/tidy-data/tb-tidy.png)
+![结核病 (TB) - 整洁版](/images/tidy-data/tb-tidy.png)
 
 ## 变量存储在行和列中
 
 下表是一个名为 MX17004 的气象站收集的温度数据。可以看到，日期被放置在列名中，我们可以用 `melt` 进行处理；`tmax` 和 `tmin` 则表示最高温度和最低温度，他们很显然是两个不同的变量，用来衡量单个观测对象的属性的，本例中的观测对象是“天”。因此，我们需要使用 `unstack` 将其拆分成两列。
 
-![气象站](/cnblogs/images/tidy-data/weather.png)
+![气象站](/images/tidy-data/weather.png)
 
 ```python
 df = pd.read_csv('data/weather.csv')
@@ -134,7 +134,7 @@ df.to_csv('data/weather-tidy.csv', index=False)
 df
 ```
 
-![气象站 - 整洁版](/cnblogs/images/tidy-data/weather-tidy.png)
+![气象站 - 整洁版](/images/tidy-data/weather-tidy.png)
 
 ## 同一表中包含多种观测类型
 
@@ -151,9 +151,9 @@ df.to_csv('data/billboard-rank.csv', index=False)
 print(df_track, '\n\n', df)
 ```
 
-![Billboard 2000 - 歌曲](/cnblogs/images/tidy-data/billboard-track.png)
+![Billboard 2000 - 歌曲](/images/tidy-data/billboard-track.png)
 
-![Billboard 2000 - 排名](/cnblogs/images/tidy-data/billboard-rank.png)
+![Billboard 2000 - 排名](/images/tidy-data/billboard-rank.png)
 
 ## 同一观测类型分布在不同表中
 

@@ -169,7 +169,7 @@ public void testNullableArgument(@CheckForNull Object arg) {
 
 对于 Eclipse 用户，还可以使用 IDE 内置的空值检测工具，只需将默认的注解 `org.eclipse.jdt.annotation.Nullable` 替换为 SpotBugs 的注解即可：
 
-![Eclipse null analysis](/cnblogs/images/java-npe/eclipse.png)
+![Eclipse null analysis](/images/java-npe/eclipse.png)
 
 ### Checker Framework 与 `@NonNull`、`@Nullable`
 

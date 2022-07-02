@@ -12,7 +12,7 @@ date: 2017-08-06 09:09:06
 
 数据开发工作中，从上游消息队列抽取数据是一项常规的 ETL 流程。在基于 Hadoop 构建的数据仓库体系中，我们通常会使用 Flume 将事件日志从 Kafka 抽取到 HDFS，然后针对其开发 MapReduce 脚本，或直接创建以时间分区的 Hive 外部表。这项流程中的关键一环是提取日志中的事件时间，因为实时数据通常会包含延迟，且在系统临时宕机的情况下，我们需要追回遗漏的数据，因而使用的时间戳必须是事件产生的时间。Flume 提供的诸多工具能帮助我们非常便捷地实现这一点。
 
-![Apache Flume](/cnblogs/images/flume.png)
+![Apache Flume](/images/flume.png)
 
 ## HDFS Sink 和时间戳头信息
 

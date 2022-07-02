@@ -58,7 +58,7 @@ MapReduce，简称mapred，是Hadoop的核心概念之一。可以将其理解�
 
 以Wordcount为例，将一段文字划分成一个个单词的过程就是Map。这个过程是可以并行执行的，即将文章拆分成多个段落，每个段落分别在不同的节点上执行划分单词的操作。这个过程结束后，我们便可以统计各个单词出现的次数，这也就是Reduce的过程。同样，Reduce也是可以并发执行的。整个过程如下图所示：
 
-![Wordcount](/cnblogs/images/cia-hadoop/wordcount.png)
+![Wordcount](/images/cia-hadoop/wordcount.png)
 
 中间Shuffle部分的功能是将Map输出的数据按键排序，交由Reduce处理。整个过程全部由Hadoop把控，开发者只需编写`Map`和`Reduce`函数，这也是Hadoop强大之处。
 

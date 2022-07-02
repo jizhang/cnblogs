@@ -156,13 +156,13 @@ export default class ListDataset extends React.Component {
 
 上文说到，箭头函数会引发 `PureComponent` 不必要的渲染，这个结论只正确了一半。React 的渲染过程可以分为几个步骤：首先，调用 `render` 方法，返回一个 React 元素的树形结构；将该结构与内存中的虚拟 DOM 树进行对比，将差异部分应用到浏览器的真实 DOM 树中。这个过程在 React 中称为协调（[reconciliation][4]）。因此，即便 `render` 方法被调用了多次，如果其返回的 React 元素树都是相同的，那么也不会触发真实 DOM 渲染，而这个过程通常会比纯 JavaScript 要来得耗时。这样看来，如果一个组件的确需要频繁变动，那么继承了 `PureComponent` 反而会增加一次比对的消耗，得不偿失。
 
-![shouldComponentUpdate 生命周期方法](/cnblogs/images/jsx-no-bind/should-component-update.png)
+![shouldComponentUpdate 生命周期方法](/images/jsx-no-bind/should-component-update.png)
 
 [图片来源][9]
 
 此外，在事件绑定属性中使用箭头函数，一般也不会触发真实 DOM 的渲染，原因是 React 的事件监听器是绑定在顶层的 `document` 元素上的，当 `li` 上触发了 `onClick` 事件后，该事件会向上冒泡（bubble up）至顶层元素，由 React 事件管理系统接收和处理。
 
-![顶层事件委托](/cnblogs/images/jsx-no-bind/top-level-delegation.jpg)
+![顶层事件委托](/images/jsx-no-bind/top-level-delegation.jpg)
 
 [图片来源][10]
 

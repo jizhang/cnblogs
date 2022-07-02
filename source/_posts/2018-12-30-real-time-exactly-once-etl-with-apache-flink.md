@@ -13,7 +13,7 @@ date: 2018-12-30 12:39:06
 
 Apache Flink 是大数据领域又一新兴框架。它与 Spark 的不同之处在于，它是使用流式处理来模拟批量处理的，因此能够提供亚秒级的、符合 Exactly-once 语义的实时处理能力。Flink 的使用场景之一是构建实时的数据通道，在不同的存储之间搬运和转换数据。本文将介绍如何使用 Flink 开发实时 ETL 程序，并介绍 Flink 是如何保证其 Exactly-once 语义的。
 
-![Apache Flink](/cnblogs/images/flink/arch.png)
+![Apache Flink](/images/flink/arch.png)
 
 ## 示例程序
 
@@ -124,7 +124,7 @@ bin/flink run -c com.shzhangji.flinksandbox.kafka.KafkaLoader target/flink-sandb
 
 脚本的运行状态可以在 Flink 仪表盘中查看：
 
-![Flink Dashboard](/cnblogs/images/flink/dashboard.png)
+![Flink Dashboard](/images/flink/dashboard.png)
 
 #### 使用暂存点来停止和恢复脚本
 
@@ -165,7 +165,7 @@ Flink 实时处理程序可以分为三个部分，数据源、处理流程、�
 
 Flink 的检查点机制是基于 Chandy-Lamport 算法的：Flink 会定时在数据流中安插轻量的标记信息（Barrier），将消息流切割成一组组记录；当某个算子处理完一组记录后，就将当前状态保存为一个检查点，提交给 JobManager，该组的标记信息也会传递给下游；当末端的算子（通常是 Sink）处理完这组记录并提交检查点后，这个检查点将被标记为“已完成”；当脚本出现问题时，就会从最后一个“已完成”的检查点开始重放记录。
 
-![Stream Barrier](/cnblogs/images/flink/stream-barrier.png)
+![Stream Barrier](/images/flink/stream-barrier.png)
 
 如果算子有多个上游，Flink 会使用一种称为“消息对齐”的机制：如果某个上游出现延迟，当前算子会停止从其它上游消费消息，直到延迟的上游赶上进度，这样就保证了算子中的状态不会包含下一批次的记录。显然，这种方式会引入额外的延迟，因此除了这种 `EXACTLY_ONCE` 模式，我们也可将检查点配置为 `AT_LEAST_ONCE`，以获得更高的吞吐量。具体方式请参考 [官方文档][6]。
 

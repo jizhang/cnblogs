@@ -11,7 +11,7 @@ date: 2018-04-18 09:08:41
 
 
 
-![](/cnblogs/images/vue.png)
+![](/images/vue.png)
 
 在使用 Vue 进行表单处理时，我们通常会使用 `v-model` 来建立双向绑定。但是，如果将表单数据交由 Vuex 管理，这时的双向绑定就会引发问题，因为在 **严格模式** 下，Vuex 是不允许在 Mutation 之外的地方修改状态数据的。以下用一个简单的项目举例说明，完整代码可在 GitHub（[链接](https://github.com/jizhang/vuex-form)） 查看。
 

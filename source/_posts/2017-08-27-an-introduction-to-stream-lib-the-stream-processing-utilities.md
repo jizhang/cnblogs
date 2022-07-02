@@ -40,7 +40,7 @@ System.out.println(card.cardinality()); // 4
 
 ## 集合成员测试 `BloomFilter`
 
-![Bloom Filter](/cnblogs/images/stream-lib/bloom-filter.jpg)
+![Bloom Filter](/images/stream-lib/bloom-filter.jpg)
 
 `BloomFilter` 用于检测一个元素是否包含在集合中，是一种广泛应用的数据结构。它的特点是有一定几率误报（False Positive Probability, FPP），但绝不会漏报（False Negative）。举例来说，Chrome 在检测恶意 URL 时，会在本地维护一个布隆过滤器。当用户输入一个 URL 时，如果布隆过滤器说它不在恶意网址库里，则它一定不在；如果返回结果为真，则 Chrome 会进一步请求服务器以确认是否的确是恶意网址，并提示给用户。
 
@@ -64,7 +64,7 @@ System.out.println(filter.isPresent("bing.com")); // false
 
 ## Top K 排名 `CountMinSketch`
 
-![Count Min Sketch](/cnblogs/images/stream-lib/count-min-sketch.png)
+![Count Min Sketch](/images/stream-lib/count-min-sketch.png)
 
 [图片来源](https://stackoverflow.com/a/35356116/1030720)
 
@@ -96,7 +96,7 @@ System.out.println(top); // {rabbit=25, bird=45, spider=35}
 
 ## 分位数计算  `T-Digest`
 
-![T-Digest](/cnblogs/images/stream-lib/t-digest.png)
+![T-Digest](/images/stream-lib/t-digest.png)
 
 [图片来源](https://dataorigami.net/blogs/napkin-folding/19055451-percentile-and-quantile-estimation-of-big-data-the-t-digest)
 

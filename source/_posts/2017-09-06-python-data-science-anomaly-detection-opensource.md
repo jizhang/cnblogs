@@ -12,7 +12,7 @@ date: 2017-09-06 09:49:10
 
 ## 2017 Top 15 Python 数据科学类库
 
-![Google Trends](/cnblogs/images/digest/google-trends.png)
+![Google Trends](/images/digest/google-trends.png)
 
 近年来，Python 在数据科学领域得到了越来越多的关注，本文整理归类了使用率最高的数据科学类库，供大家参考。
 
@@ -30,7 +30,7 @@ SciKit-Learn 是公认的 Python 机器学习标准类库，它提供了准确�
 
 ## 时间序列数据异常点检测算法
 
-![](/cnblogs/images/digest/anomaly-detection-cart.png)
+![](/images/digest/anomaly-detection-cart.png)
 
 异常点检测是指寻找那些偏离标准值或正常值的数据点。异常点有几种常见的类型：短期内产生的峰值，包括最大值、最小值、以及零值；长期的数据合计与上一周期的比较等。检测方法也可以归类为两种：对数据点进行分类，标记异常与否；或是对未来数据走势做预测，给出置信区间。
 
@@ -46,7 +46,7 @@ ARIMA 是一种较为简单的算法，通过历史值来预测下一个数据�
 
 ## 如何加入开源项目
 
-![opensource](/cnblogs/images/digest/opensource.jpg)
+![opensource](/images/digest/opensource.jpg)
 
 已经蠢蠢欲动了吗？不如马上开始！找一个你正在使用的开源项目，Fork 源码仓库。先从修复 Bug 开始，或者为现有代码编写单元测试。过程中你需要学会读懂别人的代码，遵循代码规范。提交补丁后，你一定会受到猛烈的抨击，千万不要因此胆怯。熟悉代码之后，可以寻求一些更重要的职责，比如提出一个新的特性，或者认领新特性的开发工作。最后，你也可以开启自己的开源项目。
 

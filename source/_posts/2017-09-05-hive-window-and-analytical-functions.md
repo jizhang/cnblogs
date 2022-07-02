@@ -12,7 +12,7 @@ date: 2017-09-05 12:17:10
 
 SQL 结构化查询语言是数据分析领域的重要工具之一。它提供了数据筛选、转换、聚合等操作，并能借助 Hive 和 Hadoop 进行大数据量的处理。但是，传统的 SQL 语句并不能支持诸如分组排名、滑动平均值等计算，原因是 `GROUP BY` 语句只能为每个分组的数据返回一行结果，而非每条数据一行。幸运的是，新版的 SQL 标准引入了窗口查询功能，使用 `WINDOW` 语句我们可以基于分区和窗口为每条数据都生成一行结果记录，这一标准也已得到了 Hive 的支持。
 
-![滑动平均值](/cnblogs/images/hive-window/window-stock.png)
+![滑动平均值](/images/hive-window/window-stock.png)
 
 举例来说，我们想要计算表中每只股票的两日滑动平均值，可以编写以下查询语句：
 
@@ -35,7 +35,7 @@ SELECT AVG(`close`) OVER (PARTITION BY `stock`) AS `mavg` FROM `t_stock`;
 
 ## 窗口查询的基本概念
 
-![基本概念](/cnblogs/images/hive-window/concepts.png)
+![基本概念](/images/hive-window/concepts.png)
 
 [图片来源][1]
 
@@ -124,13 +124,13 @@ SELECT
 FROM t_employee;
 ```
 
-![累积分布](/cnblogs/images/hive-window/employee-pct.png)
+![累积分布](/images/hive-window/employee-pct.png)
 
 ### 点击流会话
 
 我们可以根据点击流的时间间隔来将它们拆分成不同的会话，如超过 30 分钟认为是一次新的会话。我们还将为每个会话赋上自增 ID：
 
-![点击流](/cnblogs/images/hive-window/clickstream.png)
+![点击流](/images/hive-window/clickstream.png)
 
 首先，在子查询 `b` 中，我们借助 `LAG(col)` 函数计算出当前行和上一行的时间差，如果大于 30 分钟则标记为新回话的开始。之后，我们对 `new_session` 字段做累计求和，从而得到一个递增的 ID 序列。
 
@@ -157,7 +157,7 @@ WINDOW x AS (PARTITION BY ipaddress ORDER BY ts);
 
 PTF 顾名思义是运行于分区之上、能够处理分区中的记录并输出多行结果的函数。下方的时序图列出了这个过程中重要的一些类。`PTFOperator` 会读取已经排好序的数据，创建相应的“输入分区”；`WindowTableFunction` 则负责管理窗口帧、调用窗口函数（UDAF）、并将结果写入“输出分区”。
 
-![PTF 时序图](/cnblogs/images/hive-window/window-sequence.png)
+![PTF 时序图](/images/hive-window/window-sequence.png)
 
 HIVE-896（[链接][2]）包含了将分析型函数引入 Hive 的讨论过程；这份演示文档（[链接][3]）则介绍了当时的主要研发团队是如何设计和实现 PTF 的。
 

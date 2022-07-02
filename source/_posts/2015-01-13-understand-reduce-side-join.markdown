@@ -10,7 +10,7 @@ published: true
 
 在《[MapReduce Design Patterns][1]》一书中，作者给出了Reduce-side Join的实现方法，大致步骤如下：
 
-![](/cnblogs/images/reduce-side-join/reduce-side-join.png)
+![](/images/reduce-side-join/reduce-side-join.png)
 
 1. 使用[MultipleInputs][2]指定不同的来源表和相应的Mapper类；
 2. Mapper输出的Key为Join的字段内容，Value为打了来源表标签的记录；

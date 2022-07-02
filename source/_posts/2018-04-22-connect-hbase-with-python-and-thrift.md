@@ -11,7 +11,7 @@ date: 2018-04-22 20:36:08
 
 [Apache HBase][1] 是 Hadoop 生态环境中的键值存储系统（Key-value Store）。它构建在 HDFS 之上，可以对大型数据进行高速的读写操作。HBase 的开发语言是 Java，因此提供了原生的 Java 语言客户端。不过，借助于 Thrift 和其丰富的语言扩展，我们可以十分便捷地在任何地方调用 HBase 服务。文本将讲述的就是如何使用 Thrift 和 Python 来读写 HBase。
 
-![](/cnblogs/images/hbase.png)
+![](/images/hbase.png)
 
 ## 生成 Thrift 类定义
 
@@ -218,7 +218,7 @@ Thrift Server 的单点问题有几种解决方案：
 
 通常我们会选择第二种方案，这就需要和运维工程师一起配合搭建了。
 
-![](/cnblogs/images/hbase-thrift-ha.png)
+![](/images/hbase-thrift-ha.png)
 
 ## 参考资料
 
