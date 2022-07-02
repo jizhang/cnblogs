@@ -33,7 +33,7 @@ archive_type: 'monthly'
 show_count: false
 
 # Miscellaneous
-google_analytics: UA-37223379-1
+google_analytics:
 favicon: /favicon.png
 twitter: zjerryj
 google_plus: zhangji87@gmail.com
