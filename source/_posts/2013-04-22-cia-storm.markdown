@@ -1,60 +1,55 @@
 ---
-layout: post
-title: "Clojure 实战(5)：Storm 实时计算框架"
-date: 2013-04-22 12:11
-comments: true
-categories: [Big Data]
+title: Clojure 实战(5)：Storm 实时计算框架
+date: 2013-04-22 12:11:00
+categories: Big Data
 tags: [clojure, storm, tutorial]
-published: true
 ---
 
-Storm简介
----------
+## Storm 简介
 
-上一章介绍的Hadoop工具能够对海量数据进行批量处理，采用分布式的并行计算架构，只需使用其提供的MapReduce API编写脚本即可。但随着人们对数据实时性的要求越来越高，如实时日志分析、实时推荐系统等，Hadoop就无能为力了。
+上一章介绍的 Hadoop 工具能够对海量数据进行批量处理，采用分布式的并行计算架构，只需使用其提供的 MapReduce API 编写脚本即可。但随着人们对数据实时性的要求越来越高，如实时日志分析、实时推荐系统等，Hadoop 就无能为力了。
 
-这时，Storm诞生了。它的设计初衷就是提供一套分布式的实时计算框架，实现低延迟、高并发的海量数据处理，被誉为“Realtime Hadoop”。它提供了简单易用的API接口用于编写实时处理脚本；能够和现有各类消息系统整合；提供了HA、容错、事务、RPC等高级特性。
+这时，Storm 诞生了。它的设计初衷就是提供一套分布式的实时计算框架，实现低延迟、高并发的海量数据处理，被誉为“Realtime Hadoop”。它提供了简单易用的 API 接口用于编写实时处理脚本；能够和现有各类消息系统整合；提供了 HA、容错、事务、RPC 等高级特性。
 
-Storm的官网是：[storm-project.net](http://storm-project.net/)，它的[Wiki](https://github.com/nathanmarz/storm/wiki)上有非常详尽的说明文档。
+Storm 的官网是：[storm-project.net](http://storm-project.net/)，它的 [Wiki](https://github.com/nathanmarz/storm/wiki) 上有非常详尽的说明文档。
 
-### Storm与Clojure
+### Storm 与 Clojure
 
-Storm的主要贡献者[Nathan Marz](https://github.com/nathanmarz)和[徐明明](https://github.com/xumingming)都是活跃的Clojure开发者，因此在Storm框架中也提供了原生的[Clojure DSL](https://github.com/nathanmarz/storm/wiki/Clojure-DSL)。本文就将介绍如何使用这套DSL来编写Storm处理脚本。
+Storm 的主要贡献者 [Nathan Marz](https://github.com/nathanmarz) 和[徐明明](https://github.com/xumingming)都是活跃的 Clojure 开发者，因此在 Storm 框架中也提供了原生的 [Clojure DSL](https://github.com/nathanmarz/storm/wiki/Clojure-DSL)。本文就将介绍如何使用这套 DSL 来编写 Storm 处理脚本。
 
-Storm集群的安装配置这里不会讲述，具体请参考[这篇文档](https://github.com/nathanmarz/storm/wiki/Setting-up-a-Storm-cluster)。下文的脚本都运行在“本地模式”之下，因此即使不搭建集群也可以运行和调试。
+Storm 集群的安装配置这里不会讲述，具体请参考[这篇文档](https://github.com/nathanmarz/storm/wiki/Setting-up-a-Storm-cluster)。下文的脚本都运行在“本地模式”之下，因此即使不搭建集群也可以运行和调试。
 
 <!-- more -->
 
-Storm脚本的组件
----------------
+## Storm 脚本的组件
 
-<img src="http://storm-project.net/images/topology.png" height="200">
+![Storm flow](/images/storm-flow.png)
 
-Storm脚本的英文名称叫做“Storm Topology”，直译过来是“拓扑结构”。这个脚本由两大类组建构成，`Spout`和`Bolt`，分别可以有任意多个。他们之间以“数据流”的方式连接起来，因此整体看来就像一张拓扑网络，因此得名`Topology`。
+Storm 脚本的英文名称叫做“Storm Topology”，直译过来是“拓扑结构”。这个脚本由两大类组建构成，`Spout` 和 `Bolt`，分别可以有任意多个。他们之间以“数据流”的方式连接起来，因此整体看来就像一张拓扑网络，因此得名 `Topology`。
 
 ### Spout
 
-数据源节点，是整个脚本的入口。Storm会不断调用该节点的`nextTuple()`方法来获取数据，分发给下游`Bolt`节点。`nextTuple()`方法中可以用各种方式从外部获取数据，如逐行读取一个文件、从消息队列（ZeroMQ、Kafka）中获取消息等。一个Storm脚本可以包含多个`Spout`节点，从而将多个数据流汇聚到一起进行处理。
+数据源节点，是整个脚本的入口。Storm 会不断调用该节点的 `nextTuple()` 方法来获取数据，分发给下游 `Bolt` 节点。`nextTuple()` 方法中可以用各种方式从外部获取数据，如逐行读取一个文件、从消息队列（ZeroMQ、Kafka）中获取消息等。一个 Storm 脚本可以包含多个 `Spout` 节点，从而将多个数据流汇聚到一起进行处理。
 
 ### Bolt
 
-数据处理节点，它是脚本的核心逻辑。它含有一个`execute()`方法，当接收到消息时，Storm会调用这个函数，并将消息传递给它。我们可以在`execute()`中对消息进行过滤（只接收符合条件的数据），或者进行聚合（统计某个条件的数据出现的次数）等。处理完毕后，这个节点可以选择将处理后的消息继续传递下去，或是持久化到数据库中。
+数据处理节点，它是脚本的核心逻辑。它含有一个 `execute()` 方法，当接收到消息时，Storm 会调用这个函数，并将消息传递给它。我们可以在 `execute()` 中对消息进行过滤（只接收符合条件的数据），或者进行聚合（统计某个条件的数据出现的次数）等。处理完毕后，这个节点可以选择将处理后的消息继续传递下去，或是持久化到数据库中。
 
-`Bolt`同样是可以有多个的，且能够前后组合。`Bolt C`可以同时收取`Bolt A`和`Bolt B`的数据，并将处理结果继续传递给`Bolt D`。
+`Bolt` 同样是可以有多个的，且能够前后组合。`Bolt C` 可以同时收取 `Bolt A` 和 `Bolt B` 的数据，并将处理结果继续传递给 `Bolt D`。
 
-此外， *一个Bolt可以产生多个实例* ，如某个`Bolt`包含复杂耗时的计算，那在运行时可以调高其并发数量（实例的个数），从而达到并行处理的目的。
+此外， *一个 Bolt 可以产生多个实例* ，如某个 `Bolt` 包含复杂耗时的计算，那在运行时可以调高其并发数量（实例的个数），从而达到并行处理的目的。
 
 ### Tuple
 
-`Tuple`是消息传输的基本单元，一条消息即一个`Tuple`。可以将其看做是一个`HashMap`对象，它能够包含任何可序列化的数据内容。对于简单的数据类型，如整型、字符串、Map等，Storm提供了内置的序列化支持。而用户自定义的数据类型，可以通过指定序列化/反序列化函数来处理。
+`Tuple` 是消息传输的基本单元，一条消息即一个 `Tuple`。可以将其看做是一个 `HashMap` 对象，它能够包含任何可序列化的数据内容。对于简单的数据类型，如整型、字符串、Map 等，Storm 提供了内置的序列化支持。而用户自定义的数据类型，可以通过指定序列化/反序列化函数来处理。
 
 ### Stream Grouping
 
-想象一个`Spout`连接了两个`Bolt`（或一个`Bolt`的两个实例），那数据应该如何分发呢？你可以选择轮询（`ShuffleGrouping`），或是广播（`GlobalGrouping`）、亦或是按照某一个字段进行哈希分组（`FieldGrouping`），这些都称作为[`Stream Grouping`](https://github.com/nathanmarz/storm/wiki/Concepts#stream-groupings)。
+想象一个 `Spout` 连接了两个 `Bolt`（或一个 `Bolt` 的两个实例），那数据应该如何分发呢？你可以选择轮询（`ShuffleGrouping`），或是广播（`GlobalGrouping`）、亦或是按照某一个字段进行哈希分组（`FieldGrouping`），这些都称作为 [`Stream Grouping`](https://github.com/nathanmarz/storm/wiki/Concepts#stream-groupings)。
 
 ## 示例：WordCount
 
-下面我们就来实现一个实时版的WordCount脚本，它由以下几个组件构成：
+下面我们就来实现一个实时版的 WordCount 脚本，它由以下几个组件构成：
 
 * sentence-spout：从已知的一段文字中随机选取一句话发送出来；
 * split-bolt：将这句话按空格分割成单词；
@@ -62,7 +57,7 @@ Storm脚本的英文名称叫做“Storm Topology”，直译过来是“拓扑�
 
 ### 依赖项和配置文件
 
-首先使用`lein new`新建一个项目，并修改`project.clj`文件：
+首先使用 `lein new` 新建一个项目，并修改 `project.clj` 文件：
 
 ```clojure
 (defproject cia-storm "0.1.0-SNAPSHOT"
@@ -74,11 +69,11 @@ Storm脚本的英文名称叫做“Storm Topology”，直译过来是“拓扑�
   :aot [cia-storm.wordcount])
 ```
 
-其中`:profiles`表示定义不同的用户配置文件。Leiningen有类似于Maven的配置文件体系（profile），每个配置文件中可以定义`project.clj`所支持的各种属性，执行时会进行合并。`lein`命令默认调用`:dev`、`:user`等配置文件，可以使用`lein with-profiles prod run`来指定配置文件。具体可以参考[这份文档](https://github.com/technomancy/leiningen/blob/master/doc/PROFILES.md)。
+其中 `:profiles` 表示定义不同的用户配置文件。Leiningen 有类似于 Maven 的配置文件体系（profile），每个配置文件中可以定义 `project.clj` 所支持的各种属性，执行时会进行合并。`lein` 命令默认调用 `:dev`、`:user` 等配置文件，可以使用 `lein with-profiles prod run` 来指定配置文件。具体可以参考[这份文档](https://github.com/technomancy/leiningen/blob/master/doc/PROFILES.md)。
 
-这里将`[storm "0.8.2"]`依赖项定义在了`:dev`配置下，如果直接定义在外层的`:dependencies`下，那在使用`lein uberjar`进行打包时，会将`storm.jar`包含在最终的Jar包中，提交到Storm集群运行时就会报冲突。而`lein uberjar`默认会跳过`:dev`配置，所以才这样定义。
+这里将 `[storm "0.8.2"]` 依赖项定义在了 `:dev` 配置下，如果直接定义在外层的 `:dependencies` 下，那在使用 `lein uberjar` 进行打包时，会将 `storm.jar` 包含在最终的 Jar 包中，提交到 Storm 集群运行时就会报冲突。而 `lein uberjar` 默认会跳过 `:dev` 配置，所以才这样定义。
 
-`:aot`表示`Ahead Of Time`，即预编译。我们在[Clojure实战（3）](http://shzhangji.com/blog/2012/12/16/cia-noir-3/)中提过`:gen-class`这个标识表示为当前`.clj`文件生成一个`.class`文件，从而能够作为`main`函数使用，因此也需要在`project.clj`中添加`:main`标识，指向这个`.clj`文件的命名空间。如果想为其它的命名空间也生成对应的`.class`文件，就需要用到`:aot`了。它的另一个用处是加速Clojure程序的启动速度。
+`:aot` 表示 Ahead Of Time，即预编译。我们在 [Clojure实战（3）](http://shzhangji.com/blog/2012/12/16/cia-noir-3/)中提过 `:gen-class` 这个标识表示为当前 `.clj` 文件生成一个 `.class` 文件，从而能够作为 `main` 函数使用，因此也需要在 `project.clj` 中添加 `:main` 标识，指向这个 `.clj` 文件的命名空间。如果想为其它的命名空间也生成对应的 `.class` 文件，就需要用到 `:aot` 了。它的另一个用处是加速 Clojure 程序的启动速度。
 
 ### sentence-spout
 
@@ -99,16 +94,16 @@ Storm脚本的英文名称叫做“Storm Topology”，直译过来是“拓扑�
         (emit-spout! collector [(rand-nth sentences)])))))
 ```
 
-`defspout`是定义在`backtype.storm.clojure`命名空间下的宏，可以[点此](https://github.com/nathanmarz/storm/blob/master/storm-core/src/clj/backtype/storm/clojure.clj#L93)查看源码。以下是各个部分的说明：
+`defspout` 是定义在 `backtype.storm.clojure` 命名空间下的宏，可以[点此](https://github.com/nathanmarz/storm/blob/master/storm-core/src/clj/backtype/storm/clojure.clj#L93)查看源码。以下是各个部分的说明：
 
-* `sentence-spout`是该组件的名称。
-* `["sentence"]`表示该组件输出一个字段，名称为“sentence”。
-* `[conf context collector]`用于接收Storm框架传入的参数，如配置对象、上下文对象、下游消息收集器等。
-* `spout`表示开始定义数据源组件需要用到的各类方法。它实质上是生成一个实现了ISpout接口的对象，从而能够被Storm框架调用。
-* `nextTuple`是ISpout接口必须实现的方法之一，Storm会不断调用这个方法，获取数据。这里使用`Thread#sleep`函数来控制调用的频率。
-* `emit-spout!`是一个函数，用于向下游发送消息。
+* `sentence-spout` 是该组件的名称。
+* `["sentence"]` 表示该组件输出一个字段，名称为“sentence”。
+* `[conf context collector]` 用于接收 Storm 框架传入的参数，如配置对象、上下文对象、下游消息收集器等。
+* `spout` 表示开始定义数据源组件需要用到的各类方法。它实质上是生成一个实现了 ISpout 接口的对象，从而能够被 Storm 框架调用。
+* `nextTuple` 是 ISpout 接口必须实现的方法之一，Storm 会不断调用这个方法，获取数据。这里使用 `Thread#sleep` 函数来控制调用的频率。
+* `emit-spout!` 是一个函数，用于向下游发送消息。
 
-ISpout还有open、ack、fail等函数，分别表示初始化、消息处理成功的回调、消息处理失败的回调。这里我们暂不深入讨论。
+ISpout 还有 open、ack、fail 等函数，分别表示初始化、消息处理成功的回调、消息处理失败的回调。这里我们暂不深入讨论。
 
 ### split-bolt
 
@@ -123,18 +118,18 @@ ISpout还有open、ack、fail等函数，分别表示初始化、消息处理成
       (ack! collector tuple))))
 ```
 
-`defbolt`用于定义一个Bolt组件。整段代码的结构和`defspout`是比较相似的。`bolt`宏会实现为一个IBolt对象，`execute`是该接口的方法之一，其它还有`prepare`和`cleanup`。`execute`方法接收一个参数`tuple`，用于接收上游消息。
+`defbolt` 用于定义一个 Bolt 组件。整段代码的结构和 `defspout` 是比较相似的。`bolt` 宏会实现为一个 IBolt 对象，`execute` 是该接口的方法之一，其它还有 `prepare` 和 `cleanup`。`execute` 方法接收一个参数 `tuple`，用于接收上游消息。
 
-`ack!`是`execute`中必须调用的一个方法。Storm会对每一个组件发送出来的消息进行追踪，上游组件发出的消息需要得到下游组件的“确认”（ACKnowlege），否则会一直堆积在内存中。对于Spout而言，如果消息得到确认，会触发`ISpout#ack`函数，否则会触发`ISpout#fail`函数，这时Spout可以选择重发或报错。
+`ack!` 是 `execute` 中必须调用的一个方法。Storm 会对每一个组件发送出来的消息进行追踪，上游组件发出的消息需要得到下游组件的“确认”（ACKnowlege），否则会一直堆积在内存中。对于 Spout 而言，如果消息得到确认，会触发 `ISpout#ack` 函数，否则会触发 `ISpout#fail` 函数，这时 Spout 可以选择重发或报错。
 
-代码中比较怪异的是`{:prepare true}`。`defspout`和`defbolt`有两种定义方式，即prepare和非prepare。两者的区别在于：
+代码中比较怪异的是 `{:prepare true}`。`defspout` 和 `defbolt` 有两种定义方式，即 prepare 和非 prepare。两者的区别在于：
 
-* 参数不同，prepare方式下接收的参数是`[conf context collector]`，非prepare方式下，`defspout`接收的是`[collector]`，`defbolt`是[tuple collector]`。
-* prepare方式下需要调用`spout`和`bolt`宏来编写组件代码，而非prepare方式则不需要——`defspout`会默认生成`nextTuple()`函数，`defbolt`默认生成`execute(tuple)`。
-* 只有prepare方式下才能指定`ISpout#open`、`IBolt#prepare`等函数，非prepare不能。
-* `defspout`默认使用prepare方式，`defbolt`默认使用非prepare方式。
+* 参数不同，prepare 方式下接收的参数是 `[conf context collector]`，非 prepare 方式下，`defspout` 接收的是 `[collector]`，`defbolt` 是 `[tuple collector]`。
+* prepare 方式下需要调用 `spout` 和 `bolt` 宏来编写组件代码，而非 prepare 方式则不需要——`defspout` 会默认生成 `nextTuple()` 函数，`defbolt` 默认生成 `execute(tuple)`。
+* 只有 prepare 方式下才能指定 `ISpout#open`、`IBolt#prepare` 等函数，非 prepare 不能。
+* `defspout` 默认使用 prepare 方式，`defbolt` 默认使用非 prepare 方式。
 
-因此，`split-bolt`可以按如下方式重写：
+因此，`split-bolt` 可以按如下方式重写：
 
 ```clojure
 (defbolt split-bolt ["word"]
@@ -145,7 +140,7 @@ ISpout还有open、ack、fail等函数，分别表示初始化、消息处理成
     (ack! collector tuple)))
 ```
 
-prepare方式可以用于在组件中保存状态，具体请看下面的计数Bolt。
+prepare 方式可以用于在组件中保存状态，具体请看下面的计数 Bolt。
 
 ### count-bolt
 
@@ -162,27 +157,27 @@ prepare方式可以用于在组件中保存状态，具体请看下面的计数B
 
 #### 原子（Atom）
 
-`atom`是我们遇到的第一个可变量（Mutable Variable），其它的有Ref、Agent等。Atom是“原子”的意思，我们很容易想到原子性操作，即同一时刻只有一个线程能够修改Atom的值，因此它是处理并发的一种方式。这里我们使用Atom来保存每个单词出现的数量。以下是Atom的常用操作：
+`atom` 是我们遇到的第一个可变量（Mutable Variable），其它的有 Ref、Agent 等。Atom 是“原子”的意思，我们很容易想到原子性操作，即同一时刻只有一个线程能够修改 Atom 的值，因此它是处理并发的一种方式。这里我们使用 Atom 来保存每个单词出现的数量。以下是 Atom 的常用操作：
 
 ```clojure
 user=> (def cnt (atom 0))
-user=> (println @cnt) ; 使用@符号获取Atom中的值。
+user=> (println @cnt) ; 使用 @ 符号获取 Atom 中的值。
 0
-user=> (swap! cnt inc) ; 将cnt中的值置换为(inc @cnt)，并返回该新的值
+user=> (swap! cnt inc) ; 将 cnt 中的值置换为 (inc @cnt)，并返回该新的值
 1
 user=> (println @cnt)
 1
-user=> (swap! cnt + 10) ; 新值为(+ @cnt 10)
+user=> (swap! cnt + 10) ; 新值为 (+ @cnt 10)
 11
 user=> (reset! cnt 0) ; 归零
 0
 ```
 
-需要注意的是，`(swap! atom f arg ...)`中的`f`函数可能会被执行多次，因此要确保它没有副作用（side-effect，即不会产生其它状态的变化）。
+需要注意的是，`(swap! atom f arg ...)` 中的 `f` 函数可能会被执行多次，因此要确保它没有副作用（side-effect，即不会产生其它状态的变化）。
 
-再来解释一下`(partial merge-with +)`。`merge-with`函数是对map类型的一种操作，表示将一个或多个map合并起来。和`merge`不同的是，`merge-with`多接收一个`f`函数（`merge-with [f & maps]`），当键名重复时，会用`f`函数去合并它们的值，而不是直接替代。
+再来解释一下 `(partial merge-with +)`。`merge-with` 函数是对 map 类型的一种操作，表示将一个或多个 map 合并起来。和 `merge` 不同的是，`merge-with` 多接收一个 `f` 函数（`merge-with [f & maps]`），当键名重复时，会用 `f` 函数去合并它们的值，而不是直接替代。
 
-`partial`可以简单理解为给函数设定默认值，如：
+`partial` 可以简单理解为给函数设定默认值，如：
 
 ```clojure
 user=> (defn add [a b] (+ a b))
@@ -193,11 +188,11 @@ user=> (add-5 10)
 15
 ```
 
-这样一来，`(swap! counts (partial merge-with +) {word 1})`就可理解为：将`counts`这个Atom中的值（一个map类型）和`{word 1}`这个map进行合并，如果单词已存在，则递增1。
+这样一来，`(swap! counts (partial merge-with +) {word 1})` 就可理解为：将 `counts` 这个 Atom 中的值（一个 map 类型）和 `{word 1}` 这个 map 进行合并，如果单词已存在，则递增 1。
 
 #### 线程（Thread）
 
-为了输出统计值，我们为count-bolt增加prepare方法：
+为了输出统计值，我们为 count-bolt 增加 prepare 方法：
 
 ```clojure
 ...
@@ -214,9 +209,9 @@ user=> (add-5 10)
 ...
 ```
 
-这段代码的功能是：在Bolt开始处理消息之前启动一个线程，每隔5秒钟将`(atom counts)`中的单词出现次数打印出来，并对其进行清零操作。
+这段代码的功能是：在 Bolt 开始处理消息之前启动一个线程，每隔 5 秒钟将 `(atom counts)` 中的单词出现次数打印出来，并对其进行清零操作。
 
-这里我们直接使用了Java的Thread类型。读者可能会觉得好奇，Thread类型的构造函数只接收实现Runnable接口的对象，Clojure的匿名函数直接支持吗？我们做一个简单测试：
+这里我们直接使用了 Java 的 Thread 类型。读者可能会觉得好奇，Thread 类型的构造函数只接收实现 Runnable 接口的对象，Clojure 的匿名函数直接支持吗？我们做一个简单测试：
 
 ```clojure
 user=> (defn greet [name] (println "Hi" name))
@@ -226,11 +221,11 @@ user=> (instance? Runnable #(+ 1 %))
 true
 ```
 
-`logging`命名空间对应的依赖是`[org.clojure/tools.logging "0.2.6"]`，需要将其添加到`project.clj`中，它是对log4j组件的包装。这里之所以没有使用`println`输出到标准输出，是为了将该脚本上传到Storm集群中运行时也能查看到日志输出。
+`logging` 命名空间对应的依赖是 `[org.clojure/tools.logging "0.2.6"]`，需要将其添加到 `project.clj` 中，它是对 log4j 组件的包装。这里之所以没有使用 `println` 输出到标准输出，是为了将该脚本上传到 Storm 集群中运行时也能查看到日志输出。
 
-### 定义和执行Topology
+### 定义和执行 Topology
 
-各个组件已经定义完毕，下面让我们用它们组成一个Topology：
+各个组件已经定义完毕，下面让我们用它们组成一个 Topology：
 
 ```clojure
 (defn mk-topology []
@@ -244,13 +239,13 @@ true
                          :p 2)}))
 ```
 
-`topology`同样是Clojure DSL定义的宏，它接收两个map作为参数，一个用于定义使用到的Spout，一个则是Bolt。该map的键是组件的名称，该名称用于确定各组件之间的关系。
+`topology` 同样是 Clojure DSL 定义的宏，它接收两个 map 作为参数，一个用于定义使用到的 Spout，一个则是 Bolt。该 map 的键是组件的名称，该名称用于确定各组件之间的关系。
 
-`spout-spec`和`bolt-spec`则定义了组件在Topology中更具体的参数。如"split"使用的是`split-bolt`这个组件，它的上游是"sentence"，使用shuffleGrouping来对消息进行分配，`:p 3`表示会启动3个`split-bolt`实例。
+`spout-spec` 和 `bolt-spec` 则定义了组件在 Topology 中更具体的参数。如 "split" 使用的是 `split-bolt` 这个组件，它的上游是 "sentence"，使用 shuffleGrouping 来对消息进行分配，`:p 3` 表示会启动 3 个 `split-bolt` 实例。
 
-"count"使用`count-bolt`组件，上游是"split"，但聚合方式采用了fieldGrouping，因此列出了执行哈希运算时使用的消息字段（word）。为何要使用fieldGrouping？因为我们会开启两个`count-bolt`，如果采用shuffleGrouping，那单词“a”第一次出现的消息会发送给一个`count-bolt`，第二次出现会发送给另一个`count-bolt`，这样统计结果就会错乱。如果指定了`:p 1`，即只开启一个`count-bolt`实例，就不会有这样的问题。
+"count" 使用 `count-bolt` 组件，上游是 "split"，但聚合方式采用了 fieldGrouping，因此列出了执行哈希运算时使用的消息字段（word）。为何要使用 fieldGrouping？因为我们会开启两个 `count-bolt`，如果采用 shuffleGrouping，那单词“a”第一次出现的消息会发送给一个 `count-bolt`，第二次出现会发送给另一个 `count-bolt`，这样统计结果就会错乱。如果指定了 `:p 1`，即只开启一个 `count-bolt` 实例，就不会有这样的问题。
 
-#### 本地模式和Cluster模式
+#### 本地模式和 Cluster 模式
 
 ```clojure
 (ns cia-storm.wordcount
@@ -276,13 +271,13 @@ true
     (submit-topology! name)))
 ```
 
-我们为WordCount生成一个类，它的`main`函数在没有命令行参数时会以本地模式执行Topology，若传递了参数（即指定了脚本在Cluster运行时的名称），则提交至Cluster。
+我们为 WordCount 生成一个类，它的 `main` 函数在没有命令行参数时会以本地模式执行 Topology，若传递了参数（即指定了脚本在 Cluster 运行时的名称），则提交至 Cluster。
 
-这里直接使用了Storm的Java类，对参数有疑惑的可以参考[Javadoc](http://nathanmarz.github.io/storm/doc-0.8.1/)。`TOPOLOGY-WORKERS`是在`backtype.storm.config`命名空间中定义的，我们在前面的代码中`:use`过了。Storm这个项目是用Java和Clojure混写的，所以查阅代码时还需仔细一些。
+这里直接使用了 Storm 的 Java 类，对参数有疑惑的可以参考 [Javadoc](http://nathanmarz.github.io/storm/doc-0.8.1/)。`TOPOLOGY-WORKERS` 是在 `backtype.storm.config` 命名空间中定义的，我们在前面的代码中 `:use` 过了。Storm 这个项目是用 Java 和 Clojure 混写的，所以查阅代码时还需仔细一些。
 
 #### 运行结果
 
-首先我们直接用`lein`以本地模式运行该Topology：
+首先我们直接用 `lein` 以本地模式运行该 Topology：
 
 ```bash
 $ lein run -m cia-storm.wordcount
@@ -292,7 +287,7 @@ $ lein run -m cia-storm.wordcount
 11998 [Thread-21] INFO  cia-storm.wordcount  - four: 6, keeps: 7, away: 7, score: 6, petted: 16, brown: 21, little: 21, years: 6, man: 16, apple: 7, dog: 37, day: 7
 ```
 
-Cluster模式需要搭建本地集群，可以参考[这篇文档](https://github.com/nathanmarz/storm/wiki/Setting-up-a-Storm-cluster)。下文使用的`storm`命令则需要配置`~/.storm/storm.yaml`文件，具体请参考[这篇文章](https://github.com/nathanmarz/storm/wiki/Setting-up-development-environment#starting-and-stopping-topologies-on-a-remote-cluster)。
+Cluster 模式需要搭建本地集群，可以参考[这篇文档](https://github.com/nathanmarz/storm/wiki/Setting-up-a-Storm-cluster)。下文使用的 `storm` 命令则需要配置 `~/.storm/storm.yaml` 文件，具体请参考[这篇文章](https://github.com/nathanmarz/storm/wiki/Setting-up-development-environment#starting-and-stopping-topologies-on-a-remote-cluster)。
 
 ```bash
 $ lein do clean, compile, uberjar
@@ -308,6 +303,6 @@ $ tail worker-6701.log
 
 ## 小结
 
-这一章我们简单介绍了Storm的设计初衷，它是如何通过分布式并行运算解决实时数据分析问题的。Storm目前已经十分稳定，且仍处于活跃的开发状态。它的一些高级特性如DRPC、Trident等，还请感兴趣的读者自行研究。
+这一章我们简单介绍了 Storm 的设计初衷，它是如何通过分布式并行运算解决实时数据分析问题的。Storm 目前已经十分稳定，且仍处于活跃的开发状态。它的一些高级特性如 DRPC、Trident 等，还请感兴趣的读者自行研究。
 
-本文使用的WordCount示例代码：[https://github.com/jizhang/cia-storm](https://github.com/jizhang/cia-storm)。
+本文使用的 WordCount 示例代码：[https://github.com/jizhang/cia-storm](https://github.com/jizhang/cia-storm)。
