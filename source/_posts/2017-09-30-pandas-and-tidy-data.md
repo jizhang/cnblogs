@@ -168,7 +168,7 @@ print(df_track, '\n\n', df)
 [1]: https://www.jstatsoft.org/article/view/v059i10
 [2]: https://en.wikipedia.org/wiki/Hadley_Wickham
 [3]: https://github.com/hadley/tidy-data/
-[4]: https://github.com/jizhang/pandas-tidy-data
+[4]: https://github.com/jizhang/blog-demo/tree/master/pandas-tidy-data
 [5]: https://pandas.pydata.org/pandas-docs/stable/reshaping.html
 [6]: https://pandas.pydata.org/pandas-docs/stable/generated/pandas.melt.html
 [7]: https://pandas.pydata.org/pandas-docs/stable/generated/pandas.concat.html

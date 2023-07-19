@@ -265,5 +265,5 @@ windowed_counts =  windowed_counts | beam.ParDo(PrintWindowFn())
 [11]: https://github.com/apache/beam/blob/v2.1.0/sdks/python/apache_beam/transforms/combiners.py#L75
 [12]: https://beam.apache.org/documentation/sdks/pydoc/2.1.0/apache_beam.transforms.html#module-apache_beam.transforms.combiners
 [13]: https://github.com/apache/beam/blob/v2.1.0/sdks/python/apache_beam/transforms/combiners.py#L101
-[14]: https://github.com/jizhang/hello-beam/blob/master/logmining.py
+[14]: https://github.com/jizhang/blog-demo/blob/master/hello-beam/logmining.py
 [15]: https://www.oreilly.com/ideas/the-world-beyond-batch-streaming-102

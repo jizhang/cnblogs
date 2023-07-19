@@ -113,7 +113,7 @@ fetch().then(response => {
 
 ## Fetch API
 
-对于 AJAX 请求，[Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) 已经逐渐成为业界标准。我们可以将其包装成一个方法，对请求结果进行错误处理。完整的代码可以在 GitHub （[链接](https://github.com/jizhang/rest-error/blob/master/src/request.js)）中查看。
+对于 AJAX 请求，[Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) 已经逐渐成为业界标准。我们可以将其包装成一个方法，对请求结果进行错误处理。完整的代码可以在 GitHub （[链接](https://github.com/jizhang/blog-demo/blob/master/rest-error/src/request.js)）中查看。
 
 ```javascript
 function request(url, args, form) {

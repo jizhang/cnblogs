@@ -118,7 +118,7 @@ if ($pid) {
 
 ```bash
 $ jstat -gc 2017
- S0C    S1C    S0U    S1U      EC       EU        OC         OU       PC     PU    YGC     YGCT    FGC    FGCT     GCT   
+ S0C    S1C    S0U    S1U      EC       EU        OC         OU       PC     PU    YGC     YGCT    FGC    FGCT     GCT
 192.0  192.0   0.0    50.1   1792.0   682.8     4480.0     556.3    21248.0 9483.2      3    0.008   0      0.000    0.008
 ```
 
@@ -256,4 +256,4 @@ Perl文化的特色是“不只一种做法来完成一件事情”，所以我�
 
 下一章我们会继续完成这个监控脚本。
 
-PS：本文的示例代码可以从[Github](https://github.com/jizhang/perl-jvm-monitoring-example)中下载。
+PS：本文的示例代码可以从[Github](https://github.com/jizhang/blog-demo/tree/master/perl-jvm-monitor)中下载。

@@ -232,4 +232,4 @@ Thrift Server 的单点问题有几种解决方案：
 [2]: https://thrift.apache.org/
 [3]: https://github.com/apache/hbase/tree/master/hbase-thrift/src/main/resources/org/apache/hadoop/hbase
 [4]: https://hbase.apache.org/book.html#quickstart
-[5]: https://github.com/jizhang/python-hbase
+[5]: https://github.com/jizhang/blog-demo/tree/master/python-hbase

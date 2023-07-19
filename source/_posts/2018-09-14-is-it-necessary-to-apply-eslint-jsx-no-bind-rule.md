@@ -184,7 +184,7 @@ export default class ListDataset extends React.Component {
 [4]: https://reactjs.org/docs/reconciliation.html
 [5]: https://reactjs.org/docs/handling-events.html
 [6]: https://babeljs.io/docs/plugins/transform-class-properties/
-[7]: https://github.com/jizhang/jsx-no-bind/blob/master/src/components/NoArgument.js
+[7]: https://github.com/jizhang/blog-demo/blob/master/jsx-no-bind/src/components/NoArgument.js
 [8]: https://developer.mozilla.org/en/docs/Web/API/HTMLElement/dataset
 [9]: https://reactjs.org/docs/optimizing-performance.html#shouldcomponentupdate-in-action
 [10]: https://levelup.gitconnected.com/how-exactly-does-react-handles-events-71e8b5e359f2
