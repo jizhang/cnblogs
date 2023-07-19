@@ -75,7 +75,7 @@ ws.onopen = () => {
 * 服务端接受到请求后，将文件路径解析出来，顺带解析出是否要持续监听日志的标志位；
 * 服务端打开日志文件，开始不断向客户端发送日志文件内容。
 
-完整的源代码可以在 [GitHub](https://github.com/jizhang/logviewer) 中查看，以下只截取重要的部分：
+完整的源代码可以在 [GitHub](https://github.com/jizhang/blog-demo/tree/master/logviewer) 中查看，以下只截取重要的部分：
 
 ```python
 @asyncio.coroutine

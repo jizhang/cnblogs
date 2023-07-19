@@ -233,12 +233,12 @@ response = stub.Classify(request, 10.0)
 
 [1]: https://www.tensorflow.org/
 [2]: https://www.tensorflow.org/get_started/premade_estimators
-[3]: https://github.com/jizhang/tf-serve/blob/master/iris_dnn.py
+[3]: https://github.com/jizhang/blog-demo/blob/master/tf-serve/iris_dnn.py
 [4]: https://www.tensorflow.org/programmers_guide/saved_model#using_savedmodel_with_estimators
 [5]: https://github.com/tensorflow/tensorflow/blob/r1.7/tensorflow/core/example/example.proto
-[6]: https://github.com/jizhang/tf-serve/blob/master/iris_sess.py
+[6]: https://github.com/jizhang/blog-demo/blob/master/tf-serve/iris_sess.py
 [7]: https://github.com/tensorflow/tensorflow/blob/r1.7/tensorflow/contrib/predictor/saved_model_predictor.py
 [8]: https://github.com/tensorflow/tensorflow/blob/r1.7/tensorflow/python/tools/saved_model_cli.py
 [9]: https://www.tensorflow.org/serving/
 [10]: https://www.tensorflow.org/serving/setup
-[11]: https://github.com/jizhang/tf-serve/blob/master/iris_remote.py
+[11]: https://github.com/jizhang/blog-demo/blob/master/tf-serve/iris_remote.py
