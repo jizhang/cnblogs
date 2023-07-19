@@ -119,7 +119,7 @@ env.getCheckpointConfig().enableExternalizedCheckpoints(
 Flink 程序可以直接在 IDE 中调试。我们也可以搭建一个本地的 Flink 集群，并通过 Flink CLI 命令行工具来提交脚本：
 
 ```
-bin/flink run -c com.shzhangji.flinksandbox.kafka.KafkaLoader target/flink-sandbox-0.1.0.jar
+bin/flink run -c flink.kafka.KafkaLoader target/sandbox-flink-0.0.1-SNAPSHOT.jar
 ```
 
 脚本的运行状态可以在 Flink 仪表盘中查看：
@@ -138,7 +138,7 @@ Cancelled job 1253cc85e5c702dbe963dd7d8d279038. Savepoint stored in file:/tmp/fl
 具体到我们的 ETL 示例程序，暂存点中保存了当前 Kafka 队列的消费位置、正在写入的文件名等。当需要从暂存点恢复执行时，可以使用 `flink run -s` 传入目录位置。Flink 会从指定偏移量读取消息队列，并处理好中间结果文件，确保没有缺失或重复的数据。
 
 ```
-flink run -s /tmp/flink/savepoints/savepoint-1253cc-0df030f4f2ee -c com.shzhangji.flinksandbox.kafka.KafkaLoader target/flink-sandbox-0.1.0.jar
+flink run -s /tmp/flink/savepoints/savepoint-1253cc-0df030f4f2ee -c flink.kafka.KafkaLoader target/sandbox-flink-0.0.1-SNAPSHOT.jar
 ```
 
 #### 在 YARN 上运行
@@ -147,7 +147,7 @@ flink run -s /tmp/flink/savepoints/savepoint-1253cc-0df030f4f2ee -c com.shzhangj
 
 ```
 $ export HADOOP_CONF_DIR=/path/to/hadoop/conf
-$ bin/flink run -m yarn-cluster -c com.shzhangji.flinksandbox.kafka.KafkaLoader target/flink-sandbox-0.1.0.jar
+$ bin/flink run -m yarn-cluster -c flink.kafka.KafkaLoader target/sandbox-flink-0.0.1-SNAPSHOT.jar
 Submitted application application_1545534487726_0001
 ```
 
@@ -228,7 +228,7 @@ Apache Flink 构建在实时处理之上，从设计之初就充分考虑了中�
 
 [1]: https://ci.apache.org/projects/flink/flink-docs-release-1.7/dev/connectors/kafka.html
 [2]: https://kafka.apache.org/quickstart
-[3]: https://github.com/jizhang/flink-sandbox/blob/blog-etl/src/main/java/com/shzhangji/flinksandbox/kafka/EventTimeBucketAssigner.java
+[3]: https://github.com/jizhang/java-sandbox/blob/blog-flink-etl/flink/src/main/java/flink/kafka/EventTimeBucketAssigner.java
 [4]: https://ci.apache.org/projects/flink/flink-docs-release-1.7/ops/deployment/cluster_setup.html
 [5]: https://ci.apache.org/projects/flink/flink-docs-release-1.7/dev/connectors/guarantees.html
 [6]: https://ci.apache.org/projects/flink/flink-docs-release-1.7/internals/stream_checkpointing.html
