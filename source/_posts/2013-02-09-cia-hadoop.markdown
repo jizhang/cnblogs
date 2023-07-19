@@ -315,4 +315,4 @@ $ lein test cia-hadoop.browser-test
 
 本章我们简单介绍了Hadoop这一用于大数据处理的开源项目，以及如何借助clojure-hadoop类库编写MapReduce脚本，并在本地和集群上运行。Hadoop已经将大数据处理背后的种种细节都包装了起来，用户只需编写Map和Reduce函数，而借助Clojure语言，这一步也变的更为轻松和高效。Apache Hadoop是一个生态圈，其周边有很多开源项目，像Hive、HBase等，这里再推荐一个使用Clojure语言在Hadoop上执行查询的工具：[cascalog](https://github.com/nathanmarz/cascalog)。它的作者是[Nathan Marz](http://nathanmarz.com/)，也是我们下一章的主题——Storm实时计算框架——的作者。
 
-本文涉及到的源码可以到 https://github.com/jizhang/cia-hadoop 中查看。
+本文涉及到的源码可以到 https://github.com/jizhang/blog-demo/tree/master/cia-hadoop 中查看。

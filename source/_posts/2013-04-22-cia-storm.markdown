@@ -305,4 +305,4 @@ $ tail worker-6701.log
 
 这一章我们简单介绍了 Storm 的设计初衷，它是如何通过分布式并行运算解决实时数据分析问题的。Storm 目前已经十分稳定，且仍处于活跃的开发状态。它的一些高级特性如 DRPC、Trident 等，还请感兴趣的读者自行研究。
 
-本文使用的 WordCount 示例代码：[https://github.com/jizhang/cia-storm](https://github.com/jizhang/cia-storm)。
+本文使用的 WordCount 示例代码：https://github.com/jizhang/blog-demo/tree/master/cia-storm
