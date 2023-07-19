@@ -214,7 +214,7 @@ if ("retl_buffer".equals(entry.getHeader().getTableName())) {
 [1]: http://sqoop.apache.org/
 [2]: https://github.com/alibaba/canal
 [3]: https://github.com/alibaba/canal/releases
-[4]: https://github.com/jizhang/java-sandbox/blob/blog-canal/src/main/java/com/shzhangji/javasandbox/canal/SimpleClient.java
+[4]: https://github.com/jizhang/blog-demo/blob/master/canal/src/main/java/com/shzhangji/demo/canal/SimpleClient.java
 [5]: https://cwiki.apache.org/confluence/display/Hive/HCatalog+Streaming+Mutation+API
 [6]: http://hbase.apache.org/
 [7]: https://github.com/apache/hive/blob/master/hcatalog/streaming/src/test/org/apache/hive/hcatalog/streaming/mutate/ExampleUseCase.java

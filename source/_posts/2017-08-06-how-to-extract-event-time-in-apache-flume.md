@@ -130,5 +130,5 @@ producer.send(new ProducerRecord<String, byte[]>("alog", out.toByteArray()));
 
 [1]: http://flume.apache.org/FlumeUserGuide.html#regex-extractor-interceptor
 [2]: http://flume.apache.org/FlumeUserGuide.html#search-and-replace-interceptor
-[3]: https://github.com/jizhang/java-sandbox/blob/blog-flume/src/main/java/com/shzhangji/javasandbox/flume/ActionTimeInterceptor.java
+[3]: https://github.com/jizhang/blog-demo/blob/master/flume/src/main/java/com/shzhangji/demo/flume/ActionTimeInterceptor.java
 [4]: http://flume.apache.org/FlumeUserGuide.html#kafka-channel
