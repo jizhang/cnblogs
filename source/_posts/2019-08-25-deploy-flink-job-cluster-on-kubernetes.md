@@ -401,7 +401,7 @@ Flink 有着非常活跃的开源社区，他们不断改进自身设计（[FLIP
 [4]: https://storage.googleapis.com/kubernetes-release/release/v1.15.0/bin/darwin/amd64/kubectl
 [5]: https://minikube.sigs.k8s.io/docs/reference/networking/proxy/
 [6]: https://ci.apache.org/projects/flink/flink-docs-release-1.8/dev/datastream_api.html#example-program
-[7]: https://github.com/jizhang/flink-on-kubernetes
+[7]: https://github.com/jizhang/blog-demo/tree/master/flink-on-kubernetes
 [8]: https://kubernetes.io/
 [9]: https://flink.apache.org/
 [10]: https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=65147077
@@ -412,6 +412,6 @@ Flink 有着非常活跃的开源社区，他们不断改进自身设计（[FLIP
 [15]: https://ci.apache.org/projects/flink/flink-docs-release-1.8/ops/jobmanager_high_availability.html
 [16]: https://ci.apache.org/projects/flink/flink-docs-release-1.8/ops/state/savepoints.html
 [17]: https://issues.apache.org/jira/browse/FLINK-11997
-[18]: https://github.com/jizhang/flink-on-kubernetes/blob/master/docker/jobmanager.yml
+[18]: https://github.com/jizhang/blog-demo/blob/master/flink-on-kubernetes/docker/jobmanager.yml
 [19]: https://issues.apache.org/jira/browse/FLINK-9953
 [20]: https://issues.apache.org/jira/browse/FLINK-10407

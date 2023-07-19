@@ -156,6 +156,6 @@ SELECT /*+ STREAMTABLE(a) */ a.val, b.val, c.val FROM a JOIN b ON (a.key = b.key
 
 [1]: http://www.amazon.com/MapReduce-Design-Patterns-Effective-Algorithms/dp/1449327176
 [2]: https://hadoop.apache.org/docs/r1.0.4/api/org/apache/hadoop/mapred/lib/MultipleInputs.html
-[3]: https://github.com/jizhang/mapred-sandbox/blob/master/src/main/java/com/shzhangji/mapredsandbox/join/InnerJoinJob.java
-[4]: https://github.com/jizhang/mapred-sandbox/blob/master/src/main/java/com/shzhangji/mapredsandbox/join/ReduceSideJoinJob.java
+[3]: https://github.com/jizhang/java-sandbox/blob/master/mapred/src/main/java/mapred/join/InnerJoinJob.java
+[4]: https://github.com/jizhang/java-sandbox/blob/master/mapred/src/main/java/mapred/join/ReduceSideJoinJob.java
 [5]: http://grepcode.com/file/repository.cloudera.com/content/repositories/releases/org.apache.hive/hive-exec/0.10.0-cdh4.5.0/org/apache/hadoop/hive/ql/exec/persistence/RowContainer.java#RowContainer.add%28java.util.List%29
