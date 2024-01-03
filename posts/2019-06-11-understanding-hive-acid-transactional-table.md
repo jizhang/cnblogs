@@ -281,7 +281,7 @@ delete_delta_0000003_0000003_0000
 
 在 Map-Reduce 模式下运行 Hive 时，多个 Mapper 是并行执行的，这就需要将 `delta` 文件按一定的规则组织好。简单来说，`base` 和 `delta` 文件会被分配到不同的分片（Split）中，但所有分片都需要能够读取所有的 `delete` 文件，从而根据它们忽略掉已删除的记录。
 
-![Parallel Execution](/images/hive-acid/parallel-execution.png)
+![Parallel Execution](../images/hive-acid/parallel-execution.png)
 
 ### 向量化查询
 
@@ -314,7 +314,7 @@ public class VectorizedOrcAcidRowBatchReader {
 
 为了实现 ACID 事务机制，Hive 还引入了新的事务管理器 `DbTxnManager`，它能够在查询计划中分辨出 ACID 事务表，联系 Hive Metastore 打开新的事务，完成后提交事务。它也同时实现了过去的读写锁机制，用来支持非事务表的情形。
 
-![Transaction Management](/images/hive-acid/transaction-management.png)
+![Transaction Management](../images/hive-acid/transaction-management.png)
 
 Hive Metastore 负责分配新的事务 ID。这一过程是在一个数据库事务中完成的，从而避免多个 Metastore 实例冲突的情况。
 

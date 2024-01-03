@@ -9,7 +9,7 @@ date: 2019-08-25 11:02:22
 
 [Kubernetes][8] 是目前非常流行的容器编排系统，在其之上可以运行 Web 服务、大数据处理等各类应用。这些应用被打包在一个个非常轻量的容器中，我们通过声明的方式来告知 Kubernetes 要如何部署和扩容这些程序，并对外提供服务。[Flink][9] 同样是非常流行的分布式处理框架，它也可以运行在 Kubernetes 之上。将两者相结合，我们就可以得到一个健壮和高可扩的数据处理应用，并且能够更安全地和其它服务共享一个 Kubernetes 集群。
 
-![Flink on Kubernetes](/images/flink-on-kubernetes.png)
+![Flink on Kubernetes](../images/flink-on-kubernetes.png)
 
 在 Kubernetes 上部署 Flink 有两种方式：会话集群（Session Cluster）和脚本集群（Job Cluster）。会话集群和独立部署一个 Flink 集群类似，只是底层资源换成了 K8s 容器，而非直接运行在操作系统上。该集群可以提交多个脚本，因此适合运行那些短时脚本和即席查询。脚本集群则是为单个脚本部署一整套服务，包括 JobManager 和 TaskManager，运行结束后这些资源也随即释放。我们需要为每个脚本构建专门的容器镜像，分配独立的资源，因而这种方式可以更好地和其他脚本隔离开，同时便于扩容或缩容。文本将以脚本集群为例，演示如何在 K8s 上运行 Flink 实时处理程序，主要步骤如下：
 
